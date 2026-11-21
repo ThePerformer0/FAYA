@@ -67,11 +67,50 @@ class ConflictDomainError(DomainError):
     default_status_code = status.HTTP_409_CONFLICT
 
 
+def _is_expired_token_error(exc: Exception) -> bool:
+    """Distingue un JWT réellement expiré d'un jeton malformé ou falsifié."""
+    detail = getattr(exc, "detail", None)
+    if isinstance(detail, dict):
+        messages = detail.get("messages", [])
+        if isinstance(messages, list):
+            for item in messages:
+                if isinstance(item, dict):
+                    msg = str(item.get("message", "")).lower()
+                    if "expired" in msg and "invalid" not in msg:
+                        return True
+        return False
+    text = str(exc).lower()
+    return "expired" in text and "invalid" not in text
+
+
+def _set_unified_payload(
+    response: Response,
+    *,
+    code: str,
+    message: str,
+    details: dict[str, Any] | None = None,
+    status_code: int | None = None,
+) -> Response:
+    """Met à jour la réponse DRF en place afin de préserver ses en-têtes HTTP."""
+    if status_code is not None:
+        response.status_code = status_code
+    response.data = {
+        "code": code,
+        "message": message,
+        "details": details if details is not None else {},
+    }
+    if response.status_code == status.HTTP_401_UNAUTHORIZED and not response.has_header(
+        "WWW-Authenticate"
+    ):
+        response["WWW-Authenticate"] = 'Bearer realm="api"'
+    return response
+
+
 def unified_exception_handler(exc: Exception, context: dict[str, Any]) -> Response | None:
     """Garantit systématiquement le format { code, message, details }."""
 
     if isinstance(exc, DomainError):
-        return Response(
+        response = Response(
             {
                 "code": exc.code,
                 "message": exc.message,
@@ -79,6 +118,9 @@ def unified_exception_handler(exc: Exception, context: dict[str, Any]) -> Respon
             },
             status=exc.status_code,
         )
+        if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+            response["WWW-Authenticate"] = 'Bearer realm="api"'
+        return response
 
     response = exception_handler(exc, context)
     if response is None:
@@ -98,43 +140,42 @@ def unified_exception_handler(exc: Exception, context: dict[str, Any]) -> Respon
             if isinstance(response.data, dict)
             else {"non_field_errors": response.data}
         )
-        return Response(
-            {
-                "code": "VALIDATION_ERROR",
-                "message": "Les données soumises sont invalides.",
-                "details": details,
-            },
-            status=response.status_code,
+        return _set_unified_payload(
+            response,
+            code="VALIDATION_ERROR",
+            message="Les données soumises sont invalides.",
+            details=details,
         )
 
     if isinstance(exc, (InvalidToken, TokenError)):
-        return Response(
-            {
-                "code": "TOKEN_EXPIRED",
-                "message": "Le jeton d'authentification est invalide ou expiré.",
-                "details": {},
-            },
-            status=status.HTTP_401_UNAUTHORIZED,
+        if _is_expired_token_error(exc):
+            return _set_unified_payload(
+                response,
+                code="TOKEN_EXPIRED",
+                message="Le jeton d'authentification est expiré.",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+            )
+        return _set_unified_payload(
+            response,
+            code="AUTHENTICATION_FAILED",
+            message="Le jeton d'authentification est invalide.",
+            status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
     if isinstance(exc, NotAuthenticated):
-        return Response(
-            {
-                "code": "UNAUTHENTICATED",
-                "message": "Authentification requise.",
-                "details": {},
-            },
-            status=status.HTTP_401_UNAUTHORIZED,
+        return _set_unified_payload(
+            response,
+            code="UNAUTHENTICATED",
+            message="Authentification requise.",
+            status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
     if isinstance(exc, AuthenticationFailed):
-        return Response(
-            {
-                "code": "AUTHENTICATION_FAILED",
-                "message": str(exc.detail),
-                "details": {},
-            },
-            status=status.HTTP_401_UNAUTHORIZED,
+        return _set_unified_payload(
+            response,
+            code="AUTHENTICATION_FAILED",
+            message=str(exc.detail),
+            status_code=status.HTTP_401_UNAUTHORIZED,
         )
 
     if isinstance(exc, (PermissionDenied, DjangoPermissionDenied)):
@@ -143,43 +184,36 @@ def unified_exception_handler(exc: Exception, context: dict[str, Any]) -> Respon
             if isinstance(exc, PermissionDenied)
             else (str(exc) or "Vous n'avez pas la permission d'effectuer cette action.")
         )
-        return Response(
-            {
-                "code": "FORBIDDEN",
-                "message": message,
-                "details": {},
-            },
-            status=status.HTTP_403_FORBIDDEN,
+        return _set_unified_payload(
+            response,
+            code="FORBIDDEN",
+            message=message,
+            status_code=status.HTTP_403_FORBIDDEN,
         )
 
     if isinstance(exc, (NotFound, Http404)):
-        return Response(
-            {
-                "code": "NOT_FOUND",
-                "message": "Ressource introuvable.",
-                "details": {},
-            },
-            status=status.HTTP_404_NOT_FOUND,
+        return _set_unified_payload(
+            response,
+            code="NOT_FOUND",
+            message="Ressource introuvable.",
+            status_code=status.HTTP_404_NOT_FOUND,
         )
 
     if isinstance(exc, Throttled):
-        return Response(
-            {
-                "code": "RATE_LIMITED",
-                "message": "Trop de requêtes. Veuillez réessayer ultérieurement.",
-                "details": {"wait_seconds": exc.wait},
-            },
-            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        return _set_unified_payload(
+            response,
+            code="RATE_LIMITED",
+            message="Trop de requêtes. Veuillez réessayer ultérieurement.",
+            details={"wait_seconds": exc.wait},
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         )
 
     detail = response.data.get("detail") if isinstance(response.data, dict) else None
-    return Response(
-        {
-            "code": "API_ERROR",
-            "message": str(detail) if detail else "Une erreur est survenue.",
-            "details": response.data if isinstance(response.data, dict) else {},
-        },
-        status=response.status_code,
+    return _set_unified_payload(
+        response,
+        code="API_ERROR",
+        message=str(detail) if detail else "Une erreur est survenue.",
+        details=response.data if isinstance(response.data, dict) else {},
     )
 
 
