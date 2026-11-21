@@ -33,8 +33,14 @@ include = ["config*", "apps*"]
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.test"
 pythonpath = ["."]
+testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
 addopts = "--reuse-db"
+markers = [
+    "unit: Tests unitaires (règles métier, contraintes, validateurs)",
+    "integration: Tests d'intégration API et base PostgreSQL réelle",
+    "concurrency: Tests de concurrence multi-threads (transaction=True)",
+]
 
 [tool.ruff]
 target-version = "py312"
