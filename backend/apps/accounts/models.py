@@ -9,7 +9,7 @@ from django.utils import timezone
 from apps.core.models import TimeStampedUUIDModel
 
 phone_e164_validator = RegexValidator(
-    regex=r"^\+[1-9]\d{7,14}$",
+    regex=r"^\+[1-9][0-9]{7,14}\Z",
     message="Le numéro de téléphone doit être au format international (ex. +2250701020304).",
 )
 
@@ -50,7 +50,6 @@ class UserManager(BaseUserManager):
             user.set_password(password)
         else:
             user.set_unusable_password()
-        user.full_clean()
         user.save(using=self._db)
         return user
 

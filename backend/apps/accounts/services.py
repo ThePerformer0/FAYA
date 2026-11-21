@@ -57,6 +57,14 @@ def register_customer(
         role=UserRole.CUSTOMER,
     )
     try:
+        candidate.full_clean(exclude=["password"])
+    except DjangoValidationError as exc:
+        raise ValidationDomainError(
+            "Les informations d'inscription sont invalides.",
+            details=exc.message_dict,
+        ) from exc
+
+    try:
         validate_password(password, user=candidate)
     except DjangoValidationError as exc:
         raise ValidationDomainError(

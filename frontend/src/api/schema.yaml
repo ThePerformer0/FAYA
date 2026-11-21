@@ -284,7 +284,7 @@ components:
         phone:
           type: string
           minLength: 1
-          pattern: ^\+[1-9]\d{7,14}$
+          pattern: ^\+[1-9][0-9]{7,14}$
           maxLength: 20
     ReasonEnum:
       enum:
@@ -304,7 +304,7 @@ components:
         phone:
           type: string
           minLength: 1
-          pattern: ^\+[1-9]\d{7,14}$
+          pattern: ^\+[1-9][0-9]{7,14}$
           maxLength: 20
         full_name:
           type: string

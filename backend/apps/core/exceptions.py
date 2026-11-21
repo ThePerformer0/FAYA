@@ -3,7 +3,8 @@
 import logging
 from typing import Any
 
-from django.http import JsonResponse
+from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
+from django.http import Http404, JsonResponse
 from rest_framework import status
 from rest_framework.exceptions import (
     AuthenticationFailed,
@@ -136,17 +137,22 @@ def unified_exception_handler(exc: Exception, context: dict[str, Any]) -> Respon
             status=status.HTTP_401_UNAUTHORIZED,
         )
 
-    if isinstance(exc, PermissionDenied):
+    if isinstance(exc, (PermissionDenied, DjangoPermissionDenied)):
+        message = (
+            str(exc.detail)
+            if isinstance(exc, PermissionDenied)
+            else (str(exc) or "Vous n'avez pas la permission d'effectuer cette action.")
+        )
         return Response(
             {
                 "code": "FORBIDDEN",
-                "message": str(exc.detail),
+                "message": message,
                 "details": {},
             },
             status=status.HTTP_403_FORBIDDEN,
         )
 
-    if isinstance(exc, NotFound):
+    if isinstance(exc, (NotFound, Http404)):
         return Response(
             {
                 "code": "NOT_FOUND",
