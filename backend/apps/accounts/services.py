@@ -2,12 +2,13 @@
 
 from dataclasses import dataclass
 
-from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError, transaction
 from django.utils import timezone
-from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.exceptions import TokenBackendError, TokenError
+from rest_framework_simplejwt.state import token_backend
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.accounts.models import CustomerSuspension, User, UserRole
@@ -17,6 +18,51 @@ from apps.core.exceptions import (
     ValidationDomainError,
 )
 from apps.core.services import record_audit_log
+
+_FORBIDDEN_CONTROL_CHARS = ("\n", "\r", "\t", "\x00")
+
+
+def _normalize_phone(phone: str) -> str:
+    """Valide l'absence de caractères de contrôle avant normalisation."""
+    if not isinstance(phone, str) or any(ch in phone for ch in _FORBIDDEN_CONTROL_CHARS):
+        raise ValidationDomainError(
+            "Le numéro de téléphone est invalide.",
+            details={"phone": ["Le numéro de téléphone contient des caractères invalides."]},
+        )
+    return phone.strip(" ")
+
+
+def _revoke_all_user_refresh_tokens(user_id) -> None:
+    """Révoque toute la famille de refresh tokens d'un utilisateur (détection de rejeu)."""
+    with transaction.atomic():
+        active_tokens = OutstandingToken.objects.filter(
+            user_id=user_id,
+            blacklistedtoken__isnull=True,
+        )
+        BlacklistedToken.objects.bulk_create(
+            [BlacklistedToken(token=token) for token in active_tokens],
+            ignore_conflicts=True,
+        )
+
+
+def _handle_possible_token_replay(raw_refresh_token: str) -> None:
+    """Détecte le rejeu d'un refresh token déjà blacklisté et révoque la famille."""
+    try:
+        payload = token_backend.decode(raw_refresh_token, verify=True)
+    except (TokenBackendError, TokenError):
+        return
+
+    jti = payload.get("jti")
+    if not jti or payload.get("token_type") != "refresh":
+        return
+
+    outstanding = OutstandingToken.objects.filter(jti=jti).first()
+    if (
+        outstanding is not None
+        and outstanding.user_id is not None
+        and BlacklistedToken.objects.filter(token=outstanding).exists()
+    ):
+        _revoke_all_user_refresh_tokens(outstanding.user_id)
 
 
 @dataclass(frozen=True)
@@ -33,8 +79,13 @@ def register_customer(
     password: str,
 ) -> User:
     """Inscrit un nouveau compte client (rôle CUSTOMER forcé côté serveur)."""
+    if any(ch in email for ch in _FORBIDDEN_CONTROL_CHARS):
+        raise ValidationDomainError(
+            "L'adresse e-mail est invalide.",
+            details={"email": ["L'adresse e-mail contient des caractères invalides."]},
+        )
     normalized_email = email.strip().lower()
-    normalized_phone = phone.strip()
+    normalized_phone = _normalize_phone(phone)
 
     if User.objects.filter(email__iexact=normalized_email).exists():
         raise ConflictDomainError(
@@ -94,13 +145,29 @@ def register_customer(
 
 def authenticate_user(*, email: str, password: str) -> User:
     """Authentifie un utilisateur par e-mail et mot de passe."""
-    normalized_email = email.strip().lower()
-    user = authenticate(username=normalized_email, password=password)
-    if user is None:
+    if not email or not password or "\x00" in email or "\x00" in password:
         raise AuthenticationDomainError(
             "Identifiants invalides.",
             code="INVALID_CREDENTIALS",
         )
+
+    normalized_email = email.strip().lower()
+    user = User.objects.filter(email__iexact=normalized_email).first()
+
+    if user is None:
+        # Exécute un hachage factice pour atténuer les attaques par temps de réponse
+        User().set_password(password)
+        raise AuthenticationDomainError(
+            "Identifiants invalides.",
+            code="INVALID_CREDENTIALS",
+        )
+
+    if not user.check_password(password):
+        raise AuthenticationDomainError(
+            "Identifiants invalides.",
+            code="INVALID_CREDENTIALS",
+        )
+
     if not user.is_active:
         raise AuthenticationDomainError(
             "Ce compte est désactivé.",
@@ -131,6 +198,7 @@ def rotate_refresh_token(*, raw_refresh_token: str | None) -> AuthTokens:
         old_refresh = RefreshToken(raw_refresh_token)
         user_id = old_refresh["user_id"]
     except (TokenError, KeyError) as exc:
+        _handle_possible_token_replay(raw_refresh_token)
         raise AuthenticationDomainError(
             "Jeton de renouvellement invalide ou expiré.",
             code="REFRESH_TOKEN_INVALID",
@@ -147,6 +215,7 @@ def rotate_refresh_token(*, raw_refresh_token: str | None) -> AuthTokens:
     try:
         old_refresh.blacklist()
     except TokenError as exc:
+        _revoke_all_user_refresh_tokens(user.pk)
         raise AuthenticationDomainError(
             "Jeton de renouvellement déjà révoqué.",
             code="REFRESH_TOKEN_INVALID",
@@ -180,7 +249,7 @@ def update_profile(
         update_fields.append("full_name")
 
     if phone is not None:
-        normalized_phone = phone.strip()
+        normalized_phone = _normalize_phone(phone)
         if (
             normalized_phone != user.phone
             and User.objects.filter(phone=normalized_phone).exclude(pk=user.pk).exists()
