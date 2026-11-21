@@ -1,7 +1,9 @@
 """Exceptions métier typées et gestionnaire d'erreurs unifié DRF (ADR-16)."""
 
+import logging
 from typing import Any
 
+from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.exceptions import (
     AuthenticationFailed,
@@ -14,6 +16,8 @@ from rest_framework.exceptions import (
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+
+logger = logging.getLogger(__name__)
 
 
 class DomainError(Exception):
@@ -77,14 +81,27 @@ def unified_exception_handler(exc: Exception, context: dict[str, Any]) -> Respon
 
     response = exception_handler(exc, context)
     if response is None:
-        return None
+        logger.exception("Erreur interne non gérée dans l'API", exc_info=exc)
+        return Response(
+            {
+                "code": "INTERNAL_SERVER_ERROR",
+                "message": "Une erreur interne est survenue.",
+                "details": {},
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
     if isinstance(exc, ValidationError):
+        details = (
+            response.data
+            if isinstance(response.data, dict)
+            else {"non_field_errors": response.data}
+        )
         return Response(
             {
                 "code": "VALIDATION_ERROR",
                 "message": "Les données soumises sont invalides.",
-                "details": response.data,
+                "details": details,
             },
             status=response.status_code,
         )
@@ -157,4 +174,28 @@ def unified_exception_handler(exc: Exception, context: dict[str, Any]) -> Respon
             "details": response.data if isinstance(response.data, dict) else {},
         },
         status=response.status_code,
+    )
+
+
+def json_handler404(request, exception=None) -> JsonResponse:
+    """Garantit le format d'erreur JSON unifié pour les routes API inconnues."""
+    return JsonResponse(
+        {
+            "code": "NOT_FOUND",
+            "message": "Ressource introuvable.",
+            "details": {},
+        },
+        status=status.HTTP_404_NOT_FOUND,
+    )
+
+
+def json_handler500(request) -> JsonResponse:
+    """Garantit une réponse 500 JSON générique sans fuite d'information."""
+    return JsonResponse(
+        {
+            "code": "INTERNAL_SERVER_ERROR",
+            "message": "Une erreur interne est survenue.",
+            "details": {},
+        },
+        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
     )

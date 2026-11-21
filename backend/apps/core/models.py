@@ -1,6 +1,7 @@
 """Modèles transversaux : base UUID, paramètres globaux singleton et journal d'audit."""
 
 import uuid
+from zoneinfo import available_timezones
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -116,20 +117,36 @@ class PlatformSetting(models.Model):
 
     def clean(self) -> None:
         super().clean()
-        if self.order_cutoff_before_close_minutes < self.order_response_timeout_minutes:
-            raise ValidationError(
-                {
-                    "order_cutoff_before_close_minutes": (
-                        "L'arrêt des prises de commande avant la fermeture doit être "
-                        "supérieur ou égal au délai de réponse du dépôt."
-                    )
-                }
+        errors: dict[str, str] = {}
+
+        if not self.timezone or self.timezone not in available_timezones():
+            errors["timezone"] = "Fuseau horaire IANA invalide."
+
+        cutoff = self.order_cutoff_before_close_minutes
+        timeout = self.order_response_timeout_minutes
+        if isinstance(cutoff, int) and isinstance(timeout, int) and cutoff < timeout:
+            errors["order_cutoff_before_close_minutes"] = (
+                "L'arrêt des prises de commande avant la fermeture doit être "
+                "supérieur ou égal au délai de réponse du dépôt."
             )
+
+        if errors:
+            raise ValidationError(errors)
 
     @classmethod
     def load(cls) -> "PlatformSetting":
         instance, _ = cls.objects.get_or_create(pk=1)
         return instance
+
+
+class ImmutableAuditLogQuerySet(models.QuerySet):
+    """Interdit toute modification ou suppression en masse du journal d'audit."""
+
+    def update(self, **kwargs):
+        raise PermissionError("Le journal d'audit est immuable : modification interdite.")
+
+    def delete(self):
+        raise PermissionError("Le journal d'audit est immuable : suppression interdite.")
 
 
 class AuditLog(models.Model):
@@ -151,6 +168,8 @@ class AuditLog(models.Model):
     reason = models.TextField(blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
+    objects = ImmutableAuditLogQuerySet.as_manager()
+
     class Meta:
         verbose_name = "Journal d'audit"
         verbose_name_plural = "Journaux d'audit"
@@ -162,3 +181,11 @@ class AuditLog(models.Model):
 
     def __str__(self) -> str:
         return f"{self.action} ({self.resource_type}:{self.resource_id})"
+
+    def save(self, *args, **kwargs) -> None:
+        if not self._state.adding:
+            raise PermissionError("Le journal d'audit est immuable : modification interdite.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise PermissionError("Le journal d'audit est immuable : suppression interdite.")

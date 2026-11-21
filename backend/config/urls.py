@@ -2,10 +2,11 @@
 
 from django.conf import settings
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from apps.core.api.views import HealthCheckView
+from apps.core.exceptions import json_handler404
 
 admin.site.site_header = "Faya — Administration"
 admin.site.site_title = "Faya Admin"
@@ -26,3 +27,11 @@ if settings.DEBUG:
             name="swagger-ui",
         ),
     ]
+
+# Toute route /api/* non reconnue renvoie le format d'erreur JSON unifié
+urlpatterns += [
+    re_path(r"^api/.*", json_handler404),
+]
+
+handler404 = "apps.core.exceptions.json_handler404"
+handler500 = "apps.core.exceptions.json_handler500"
