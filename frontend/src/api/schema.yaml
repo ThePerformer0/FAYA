@@ -8,6 +8,8 @@ paths:
   /api/v1/auth/login/:
     post:
       operationId: auth_login_create
+      description: Empêche la mise en cache des réponses contenant des jetons ou données
+        personnelles.
       summary: Connexion par e-mail et mot de passe
       tags:
       - Auth
@@ -47,11 +49,12 @@ paths:
   /api/v1/auth/logout/:
     post:
       operationId: auth_logout_create
+      description: Empêche la mise en cache des réponses contenant des jetons ou données
+        personnelles.
       summary: Déconnexion et révocation du cookie refresh
       tags:
       - Auth
       security:
-      - jwtAuth: []
       - {}
       responses:
         '204':
@@ -59,6 +62,8 @@ paths:
   /api/v1/auth/me/:
     get:
       operationId: auth_me_retrieve
+      description: Empêche la mise en cache des réponses contenant des jetons ou données
+        personnelles.
       summary: Consulter le profil de l'utilisateur connecté
       tags:
       - Auth
@@ -79,6 +84,8 @@ paths:
           description: ''
     patch:
       operationId: auth_me_partial_update
+      description: Empêche la mise en cache des réponses contenant des jetons ou données
+        personnelles.
       summary: Mettre à jour le profil de l'utilisateur connecté
       tags:
       - Auth
@@ -123,6 +130,8 @@ paths:
   /api/v1/auth/refresh/:
     post:
       operationId: auth_refresh_create
+      description: Empêche la mise en cache des réponses contenant des jetons ou données
+        personnelles.
       summary: Renouvellement de l'Access Token via le cookie HttpOnly
       tags:
       - Auth
@@ -144,6 +153,8 @@ paths:
   /api/v1/auth/register/:
     post:
       operationId: auth_register_create
+      description: Empêche la mise en cache des réponses contenant des jetons ou données
+        personnelles.
       summary: Inscription d'un nouveau client
       tags:
       - Auth

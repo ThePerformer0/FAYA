@@ -108,7 +108,7 @@ def register_customer(
         role=UserRole.CUSTOMER,
     )
     try:
-        candidate.full_clean(exclude=["password"])
+        candidate.full_clean(exclude=["password"], validate_unique=False)
     except DjangoValidationError as exc:
         raise ValidationDomainError(
             "Les informations d'inscription sont invalides.",
@@ -137,6 +137,18 @@ def register_customer(
             details=exc.message_dict,
         ) from exc
     except IntegrityError as exc:
+        if User.objects.filter(email__iexact=normalized_email).exists():
+            raise ConflictDomainError(
+                "Un compte existe déjà avec cette adresse e-mail.",
+                code="EMAIL_ALREADY_EXISTS",
+                details={"email": ["Cette adresse e-mail est déjà utilisée."]},
+            ) from exc
+        if User.objects.filter(phone=normalized_phone).exists():
+            raise ConflictDomainError(
+                "Un compte existe déjà avec ce numéro de téléphone.",
+                code="PHONE_ALREADY_EXISTS",
+                details={"phone": ["Ce numéro de téléphone est déjà utilisé."]},
+            ) from exc
         raise ConflictDomainError(
             "Un compte avec cet e-mail ou ce téléphone existe déjà.",
             code="ACCOUNT_ALREADY_EXISTS",
@@ -187,7 +199,7 @@ def issue_auth_tokens(*, user: User) -> AuthTokens:
 
 
 def rotate_refresh_token(*, raw_refresh_token: str | None) -> AuthTokens:
-    """Valide, révoque l'ancien refresh token et émet une nouvelle paire JWT."""
+    """Valide, verrouille et révoque atomiquement l'ancien refresh token, puis émet une nouvelle paire."""
     if not raw_refresh_token:
         raise AuthenticationDomainError(
             "Jeton de renouvellement manquant.",
@@ -197,6 +209,7 @@ def rotate_refresh_token(*, raw_refresh_token: str | None) -> AuthTokens:
     try:
         old_refresh = RefreshToken(raw_refresh_token)
         user_id = old_refresh["user_id"]
+        jti = old_refresh["jti"]
     except (TokenError, KeyError) as exc:
         _handle_possible_token_replay(raw_refresh_token)
         raise AuthenticationDomainError(
@@ -204,35 +217,67 @@ def rotate_refresh_token(*, raw_refresh_token: str | None) -> AuthTokens:
             code="REFRESH_TOKEN_INVALID",
         ) from exc
 
-    try:
-        user = User.objects.get(pk=user_id, is_active=True)
-    except User.DoesNotExist as exc:
-        raise AuthenticationDomainError(
-            "Compte introuvable ou désactivé.",
-            code="ACCOUNT_DISABLED",
-        ) from exc
+    with transaction.atomic():
+        try:
+            user = User.objects.get(pk=user_id, is_active=True)
+        except User.DoesNotExist as exc:
+            raise AuthenticationDomainError(
+                "Compte introuvable ou désactivé.",
+                code="ACCOUNT_DISABLED",
+            ) from exc
 
-    try:
-        old_refresh.blacklist()
-    except TokenError as exc:
-        _revoke_all_user_refresh_tokens(user.pk)
-        raise AuthenticationDomainError(
-            "Jeton de renouvellement déjà révoqué.",
-            code="REFRESH_TOKEN_INVALID",
-        ) from exc
+        outstanding = (
+            OutstandingToken.objects.select_for_update(of=("self",))
+            .order_by()
+            .filter(jti=jti)
+            .first()
+        )
+        if outstanding is not None:
+            if BlacklistedToken.objects.filter(token=outstanding).exists():
+                # Un thread concurrent vient tout juste de consommer ce jeton
+                raise AuthenticationDomainError(
+                    "Jeton de renouvellement déjà utilisé.",
+                    code="REFRESH_TOKEN_INVALID",
+                )
+            BlacklistedToken.objects.create(token=outstanding)
+        else:
+            try:
+                old_refresh.blacklist()
+            except (TokenError, IntegrityError) as exc:
+                raise AuthenticationDomainError(
+                    "Jeton de renouvellement déjà révoqué.",
+                    code="REFRESH_TOKEN_INVALID",
+                ) from exc
 
-    return issue_auth_tokens(user=user)
+        return issue_auth_tokens(user=user)
 
 
 def revoke_refresh_token(*, raw_refresh_token: str | None) -> None:
-    """Révoque le refresh token lors de la déconnexion (idempotent)."""
+    """Révoque le refresh token lors de la déconnexion (idempotent sous concurrence)."""
     if not raw_refresh_token:
         return
     try:
         token = RefreshToken(raw_refresh_token)
-        token.blacklist()
+        jti = token.get("jti")
     except TokenError:
         return
+
+    with transaction.atomic():
+        outstanding = (
+            OutstandingToken.objects.select_for_update(of=("self",))
+            .order_by()
+            .filter(jti=jti)
+            .first()
+            if jti
+            else None
+        )
+        if outstanding is not None:
+            BlacklistedToken.objects.get_or_create(token=outstanding)
+            return
+        try:
+            token.blacklist()
+        except (TokenError, IntegrityError):
+            return
 
 
 def update_profile(
@@ -263,12 +308,18 @@ def update_profile(
         update_fields.append("phone")
 
     try:
-        user.full_clean()
+        user.full_clean(validate_unique=False)
         user.save(update_fields=update_fields)
     except DjangoValidationError as exc:
         raise ValidationDomainError(
             "Les informations du profil sont invalides.",
             details=exc.message_dict,
+        ) from exc
+    except IntegrityError as exc:
+        raise ConflictDomainError(
+            "Ce numéro de téléphone est déjà associé à un autre compte.",
+            code="PHONE_ALREADY_EXISTS",
+            details={"phone": ["Ce numéro de téléphone est déjà utilisé."]},
         ) from exc
 
     return user

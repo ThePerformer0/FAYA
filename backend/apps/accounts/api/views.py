@@ -20,7 +20,16 @@ from apps.accounts.api.serializers import (
 from apps.core.api.serializers import ApiErrorSerializer
 
 
-class RegisterView(APIView):
+class NoStoreResponseMixin:
+    """Empêche la mise en cache des réponses contenant des jetons ou données personnelles."""
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        response = super().finalize_response(request, response, *args, **kwargs)
+        response["Cache-Control"] = "no-store"
+        return response
+
+
+class RegisterView(NoStoreResponseMixin, APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
@@ -52,7 +61,7 @@ class RegisterView(APIView):
         return response
 
 
-class LoginView(APIView):
+class LoginView(NoStoreResponseMixin, APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
@@ -84,7 +93,7 @@ class LoginView(APIView):
         return response
 
 
-class RefreshView(APIView):
+class RefreshView(NoStoreResponseMixin, APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
@@ -109,7 +118,7 @@ class RefreshView(APIView):
         return response
 
 
-class LogoutView(APIView):
+class LogoutView(NoStoreResponseMixin, APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
@@ -128,7 +137,7 @@ class LogoutView(APIView):
         return response
 
 
-class MeView(APIView):
+class MeView(NoStoreResponseMixin, APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
