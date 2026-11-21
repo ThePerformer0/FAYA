@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=69.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "faya-backend"
+version = "0.1.0"
+description = "Backend API pour la plateforme PWA Faya (recherche et réservation de bouteilles de gaz)"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.2,<5.3",
+    "djangorestframework>=3.15,<4.0",
+    "djangorestframework-simplejwt>=5.5,<6.0",
+    "drf-spectacular>=0.28,<1.0",
+    "psycopg[binary]>=3.2,<4.0",
+    "argon2-cffi>=23.1",
+    "django-environ>=0.12",
+    "gunicorn>=23.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-django>=4.10",
+    "freezegun>=1.5",
+    "ruff>=0.11",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["config*", "apps*"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+pythonpath = ["."]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "--reuse-db"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+exclude = ["*/migrations/*", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "DJ"]
+ignore = ["E501"]
