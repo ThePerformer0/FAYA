@@ -151,6 +151,12 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "apps.core.exceptions.unified_exception_handler",
+    "NUM_PROXIES": env.int("DRF_NUM_PROXIES", default=0),
+    "DEFAULT_THROTTLE_RATES": {
+        "auth_login": "20/minute",
+        "auth_register": "15/minute",
+        "auth_refresh": "30/minute",
+    },
 }
 
 # === JWT Hybride (Access en RAM + Refresh en cookie HttpOnly) ===

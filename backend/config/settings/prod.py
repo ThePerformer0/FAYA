@@ -5,6 +5,9 @@ from .base import *  # noqa: F403
 DEBUG = False
 AUTH_REFRESH_COOKIE_SECURE = True
 
+# 1 reverse proxy de confiance devant Gunicorn (Caddy)
+REST_FRAMEWORK["NUM_PROXIES"] = 1  # noqa: F405
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True

@@ -17,6 +17,11 @@ from apps.accounts.api.serializers import (
     UpdateProfileSerializer,
     UserMeSerializer,
 )
+from apps.accounts.api.throttling import (
+    LoginRateThrottle,
+    RefreshRateThrottle,
+    RegisterRateThrottle,
+)
 from apps.core.api.serializers import ApiErrorSerializer
 
 
@@ -32,6 +37,7 @@ class NoStoreResponseMixin:
 class RegisterView(NoStoreResponseMixin, APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [RegisterRateThrottle]
 
     @extend_schema(
         tags=["Auth"],
@@ -64,6 +70,7 @@ class RegisterView(NoStoreResponseMixin, APIView):
 class LoginView(NoStoreResponseMixin, APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [LoginRateThrottle]
 
     @extend_schema(
         tags=["Auth"],
@@ -96,6 +103,7 @@ class LoginView(NoStoreResponseMixin, APIView):
 class RefreshView(NoStoreResponseMixin, APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [RefreshRateThrottle]
 
     @extend_schema(
         tags=["Auth"],
