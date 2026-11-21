@@ -1,0 +1,70 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4-alpine
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      POSTGRES_HOST: db
+      USE_POSTGIS: "True"
+    volumes:
+      - static_volume:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: python manage.py procrastinate worker
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+      POSTGRES_HOST: db
+      USE_POSTGIS: "True"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  proxy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN_NAME: ${DOMAIN_NAME}
+    volumes:
+      - ./proxy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - static_volume:/srv/static:ro
+      - ./frontend/dist:/srv/frontend:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+
+volumes:
+  postgres_prod_data:
+  static_volume:
+  caddy_data:
+  caddy_config:
