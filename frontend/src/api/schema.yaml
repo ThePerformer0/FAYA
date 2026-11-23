@@ -191,6 +191,198 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: ''
+  /api/v1/catalog/brands/:
+    get:
+      operationId: catalog_brands_list
+      summary: Liste des marques actives du catalogue central
+      tags:
+      - Catalog
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Brand'
+          description: ''
+  /api/v1/catalog/products/:
+    get:
+      operationId: catalog_products_list
+      summary: Liste paginée des produits publiés du catalogue central
+      parameters:
+      - in: query
+        name: brand
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: capacity_kg
+        schema:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: product_type
+        schema:
+          enum:
+          - BUTANE
+          - PROPANE
+          - LPG
+          type: string
+          minLength: 1
+        description: |-
+          * `BUTANE` - Butane
+          * `PROPANE` - Propane
+          * `LPG` - GPL
+      tags:
+      - Catalog
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depots/:
+    get:
+      operationId: depots_list
+      summary: Rechercher les dépôts actifs par proximité et filtres
+      parameters:
+      - in: query
+        name: brand
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: capacity_kg
+        schema:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+      - in: query
+        name: lat
+        schema:
+          type: number
+          format: double
+          maximum: 90.0
+          minimum: -90.0
+      - in: query
+        name: lng
+        schema:
+          type: number
+          format: double
+          maximum: 180.0
+          minimum: -180.0
+      - in: query
+        name: open_now
+        schema:
+          type: boolean
+          default: false
+      - in: query
+        name: operation
+        schema:
+          enum:
+          - REFILL
+          - EXCHANGE
+          - FIRST_ACQUISITION
+          type: string
+          minLength: 1
+        description: |-
+          * `REFILL` - Recharge
+          * `EXCHANGE` - Échange
+          * `FIRST_ACQUISITION` - Première bouteille
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+          maxLength: 120
+      - in: query
+        name: radius_km
+        schema:
+          type: number
+          format: double
+          maximum: 200.0
+          minimum: 0.1
+      tags:
+      - Depots
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPublicDepotListList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depots/{depot_id}/:
+    get:
+      operationId: depots_retrieve
+      summary: Fiche publique détaillée d'un dépôt actif
+      parameters:
+      - in: path
+        name: depot_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Depots
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicDepotDetail'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
   /api/v1/health/:
     get:
       operationId: health_retrieve
@@ -211,6 +403,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthCheck'
+          description: ''
+  /api/v1/settings/public/:
+    get:
+      operationId: settings_public_retrieve
+      description: Expose les paramètres opérationnels publics et l'heure serveur
+        (DESIGN_SYSTEM §2.4, §4.5).
+      summary: Paramètres globaux publics et horloge serveur
+      tags:
+      - System
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicPlatformSetting'
           description: ''
 components:
   schemas:
@@ -261,6 +470,24 @@ components:
       required:
       - access_token
       - user
+    Brand:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        logo_url:
+          type: string
+          format: uri
+          readOnly: true
+      required:
+      - id
+      - logo_url
+      - name
     HealthCheck:
       type: object
       properties:
@@ -285,6 +512,62 @@ components:
       required:
       - email
       - password
+    OperationTypeEnum:
+      enum:
+      - REFILL
+      - EXCHANGE
+      - FIRST_ACQUISITION
+      type: string
+      description: |-
+        * `REFILL` - Recharge
+        * `EXCHANGE` - Échange
+        * `FIRST_ACQUISITION` - Première bouteille
+    PaginatedProductList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+    PaginatedPublicDepotListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicDepotList'
     PatchedUpdateProfileRequest:
       type: object
       properties:
@@ -297,6 +580,317 @@ components:
           minLength: 1
           pattern: ^\+[1-9][0-9]{7,14}$
           maxLength: 20
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        brand:
+          allOf:
+          - $ref: '#/components/schemas/Brand'
+          readOnly: true
+        capacity_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+          description: Capacité de la bouteille en kilogrammes (ex. 6.00, 12.50).
+        product_type:
+          allOf:
+          - $ref: '#/components/schemas/ProductTypeEnum'
+          readOnly: true
+          default: BUTANE
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        characteristics:
+          readOnly: true
+        image_url:
+          type: string
+          format: uri
+          readOnly: true
+      required:
+      - brand
+      - capacity_kg
+      - characteristics
+      - description
+      - id
+      - image_url
+      - name
+      - product_type
+    ProductTypeEnum:
+      enum:
+      - BUTANE
+      - PROPANE
+      - LPG
+      type: string
+      description: |-
+        * `BUTANE` - Butane
+        * `PROPANE` - Propane
+        * `LPG` - GPL
+    PublicDepotDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        address:
+          type: string
+          readOnly: true
+        neighborhood:
+          type: string
+          readOnly: true
+          description: Quartier ou zone de référence pour la recherche textuelle.
+        phone:
+          type: string
+          readOnly: true
+          description: Numéro de contact affiché sur la fiche publique (format E.164).
+        latitude:
+          type: number
+          format: double
+          readOnly: true
+        longitude:
+          type: number
+          format: double
+          readOnly: true
+        opening_time:
+          type: string
+          format: time
+          readOnly: true
+        closing_time:
+          type: string
+          format: time
+          readOnly: true
+        open_status:
+          type: string
+          readOnly: true
+        can_order:
+          type: boolean
+          readOnly: true
+        last_order_time:
+          type: string
+          readOnly: true
+        reopens_at:
+          type: string
+          readOnly: true
+        offers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicDepotOffer'
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - can_order
+      - closing_time
+      - description
+      - id
+      - last_order_time
+      - latitude
+      - longitude
+      - name
+      - neighborhood
+      - offers
+      - open_status
+      - opening_time
+      - phone
+      - reopens_at
+      - updated_at
+    PublicDepotList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        address:
+          type: string
+          readOnly: true
+        neighborhood:
+          type: string
+          readOnly: true
+          description: Quartier ou zone de référence pour la recherche textuelle.
+        phone:
+          type: string
+          readOnly: true
+          description: Numéro de contact affiché sur la fiche publique (format E.164).
+        latitude:
+          type: number
+          format: double
+          readOnly: true
+        longitude:
+          type: number
+          format: double
+          readOnly: true
+        distance_meters:
+          type: integer
+          nullable: true
+          readOnly: true
+        opening_time:
+          type: string
+          format: time
+          readOnly: true
+        closing_time:
+          type: string
+          format: time
+          readOnly: true
+        open_status:
+          type: string
+          readOnly: true
+        can_order:
+          type: boolean
+          readOnly: true
+        last_order_time:
+          type: string
+          readOnly: true
+        reopens_at:
+          type: string
+          readOnly: true
+        offers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicDepotOffer'
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - can_order
+      - closing_time
+      - distance_meters
+      - id
+      - last_order_time
+      - latitude
+      - longitude
+      - name
+      - neighborhood
+      - offers
+      - open_status
+      - opening_time
+      - phone
+      - reopens_at
+      - updated_at
+    PublicDepotOffer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product:
+          allOf:
+          - $ref: '#/components/schemas/Product'
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicOfferOperation'
+          readOnly: true
+        exchange_brands:
+          type: array
+          items:
+            $ref: '#/components/schemas/Brand'
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - exchange_brands
+      - id
+      - notes
+      - operations
+      - product
+      - updated_at
+    PublicOfferOperation:
+      type: object
+      properties:
+        operation_type:
+          allOf:
+          - $ref: '#/components/schemas/OperationTypeEnum'
+          readOnly: true
+        gas_price:
+          type: integer
+          readOnly: true
+          description: Prix de l'opération ou du gaz (en FCFA).
+        bottle_price:
+          type: integer
+          readOnly: true
+          description: Prix de la bouteille (Première bouteille uniquement, en FCFA).
+        deposit_amount:
+          type: integer
+          readOnly: true
+          description: Montant de la consigne (Première bouteille uniquement, en FCFA).
+        total_unit_price:
+          type: integer
+          readOnly: true
+      required:
+      - bottle_price
+      - deposit_amount
+      - gas_price
+      - operation_type
+      - total_unit_price
+    PublicPlatformSetting:
+      type: object
+      properties:
+        timezone:
+          type: string
+        order_response_timeout_minutes:
+          type: integer
+        order_pickup_timeout_minutes:
+          type: integer
+        order_cutoff_before_close_minutes:
+          type: integer
+        closing_soon_threshold_minutes:
+          type: integer
+        max_quantity_per_order:
+          type: integer
+        max_active_orders_per_customer:
+          type: integer
+        no_show_threshold:
+          type: integer
+        no_show_window_days:
+          type: integer
+        suspension_duration_days:
+          type: integer
+        server_now:
+          type: string
+          format: date-time
+      required:
+      - closing_soon_threshold_minutes
+      - max_active_orders_per_customer
+      - max_quantity_per_order
+      - no_show_threshold
+      - no_show_window_days
+      - order_cutoff_before_close_minutes
+      - order_pickup_timeout_minutes
+      - order_response_timeout_minutes
+      - server_now
+      - suspension_duration_days
+      - timezone
     ReasonEnum:
       enum:
       - NO_SHOW_THRESHOLD

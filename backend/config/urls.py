@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-from apps.core.api.views import HealthCheckView
+from apps.core.api.views import HealthCheckView, PublicPlatformSettingsView
 from apps.core.exceptions import json_handler404
 
 admin.site.site_header = "Faya — Administration"
@@ -15,7 +15,10 @@ admin.site.index_title = "Tableau de bord de la plateforme"
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/health/", HealthCheckView.as_view(), name="health-check"),
+    path("api/v1/settings/public/", PublicPlatformSettingsView.as_view(), name="settings-public"),
     path("api/v1/auth/", include("apps.accounts.api.urls")),
+    path("api/v1/catalog/", include("apps.catalog.api.urls")),
+    path("api/v1/depots/", include("apps.depots.api.urls")),
 ]
 
 if settings.DEBUG:

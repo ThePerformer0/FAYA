@@ -13,7 +13,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Connexion par e-mail et mot de passe */
+        /**
+         * Connexion par e-mail et mot de passe
+         * @description Empêche la mise en cache des réponses contenant des jetons ou données personnelles.
+         */
         post: operations["auth_login_create"];
         delete?: never;
         options?: never;
@@ -30,7 +33,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Déconnexion et révocation du cookie refresh */
+        /**
+         * Déconnexion et révocation du cookie refresh
+         * @description Empêche la mise en cache des réponses contenant des jetons ou données personnelles.
+         */
         post: operations["auth_logout_create"];
         delete?: never;
         options?: never;
@@ -45,14 +51,20 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Consulter le profil de l'utilisateur connecté */
+        /**
+         * Consulter le profil de l'utilisateur connecté
+         * @description Empêche la mise en cache des réponses contenant des jetons ou données personnelles.
+         */
         get: operations["auth_me_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        /** Mettre à jour le profil de l'utilisateur connecté */
+        /**
+         * Mettre à jour le profil de l'utilisateur connecté
+         * @description Empêche la mise en cache des réponses contenant des jetons ou données personnelles.
+         */
         patch: operations["auth_me_partial_update"];
         trace?: never;
     };
@@ -65,7 +77,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Renouvellement de l'Access Token via le cookie HttpOnly */
+        /**
+         * Renouvellement de l'Access Token via le cookie HttpOnly
+         * @description Empêche la mise en cache des réponses contenant des jetons ou données personnelles.
+         */
         post: operations["auth_refresh_create"];
         delete?: never;
         options?: never;
@@ -82,8 +97,79 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Inscription d'un nouveau client */
+        /**
+         * Inscription d'un nouveau client
+         * @description Empêche la mise en cache des réponses contenant des jetons ou données personnelles.
+         */
         post: operations["auth_register_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalog/brands/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liste des marques actives du catalogue central */
+        get: operations["catalog_brands_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalog/products/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liste paginée des produits publiés du catalogue central */
+        get: operations["catalog_products_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depots/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Rechercher les dépôts actifs par proximité et filtres */
+        get: operations["depots_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depots/{depot_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Fiche publique détaillée d'un dépôt actif */
+        get: operations["depots_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -99,6 +185,26 @@ export interface paths {
         };
         /** État de santé de l'API et de la base de données */
         get: operations["health_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/settings/public/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Paramètres globaux publics et horloge serveur
+         * @description Expose les paramètres opérationnels publics et l'heure serveur (DESIGN_SYSTEM §2.4, §4.5).
+         */
+        get: operations["settings_public_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -131,6 +237,13 @@ export interface components {
             access_token: string;
             user: components["schemas"]["UserMe"];
         };
+        Brand: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            /** Format: uri */
+            readonly logo_url: string;
+        };
         HealthCheck: {
             status: string;
             database: string;
@@ -140,9 +253,156 @@ export interface components {
             email: string;
             password: string;
         };
+        /**
+         * @description * `REFILL` - Recharge
+         *     * `EXCHANGE` - Échange
+         *     * `FIRST_ACQUISITION` - Première bouteille
+         * @enum {string}
+         */
+        OperationTypeEnum: "REFILL" | "EXCHANGE" | "FIRST_ACQUISITION";
+        PaginatedProductList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["Product"][];
+        };
+        PaginatedPublicDepotListList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["PublicDepotList"][];
+        };
         PatchedUpdateProfileRequest: {
             full_name?: string;
             phone?: string;
+        };
+        Product: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly brand: components["schemas"]["Brand"];
+            /**
+             * Format: decimal
+             * @description Capacité de la bouteille en kilogrammes (ex. 6.00, 12.50).
+             */
+            readonly capacity_kg: string;
+            /** @default BUTANE */
+            readonly product_type: components["schemas"]["ProductTypeEnum"];
+            readonly name: string;
+            readonly description: string;
+            readonly characteristics: unknown;
+            /** Format: uri */
+            readonly image_url: string;
+        };
+        /**
+         * @description * `BUTANE` - Butane
+         *     * `PROPANE` - Propane
+         *     * `LPG` - GPL
+         * @enum {string}
+         */
+        ProductTypeEnum: "BUTANE" | "PROPANE" | "LPG";
+        PublicDepotDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly description: string;
+            readonly address: string;
+            /** @description Quartier ou zone de référence pour la recherche textuelle. */
+            readonly neighborhood: string;
+            /** @description Numéro de contact affiché sur la fiche publique (format E.164). */
+            readonly phone: string;
+            /** Format: double */
+            readonly latitude: number;
+            /** Format: double */
+            readonly longitude: number;
+            /** Format: time */
+            readonly opening_time: string;
+            /** Format: time */
+            readonly closing_time: string;
+            readonly open_status: string;
+            readonly can_order: boolean;
+            readonly last_order_time: string;
+            readonly reopens_at: string;
+            readonly offers: components["schemas"]["PublicDepotOffer"][];
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        PublicDepotList: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly address: string;
+            /** @description Quartier ou zone de référence pour la recherche textuelle. */
+            readonly neighborhood: string;
+            /** @description Numéro de contact affiché sur la fiche publique (format E.164). */
+            readonly phone: string;
+            /** Format: double */
+            readonly latitude: number;
+            /** Format: double */
+            readonly longitude: number;
+            readonly distance_meters: number | null;
+            /** Format: time */
+            readonly opening_time: string;
+            /** Format: time */
+            readonly closing_time: string;
+            readonly open_status: string;
+            readonly can_order: boolean;
+            readonly last_order_time: string;
+            readonly reopens_at: string;
+            readonly offers: components["schemas"]["PublicDepotOffer"][];
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        PublicDepotOffer: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly product: components["schemas"]["Product"];
+            readonly notes: string;
+            readonly operations: components["schemas"]["PublicOfferOperation"][];
+            readonly exchange_brands: components["schemas"]["Brand"][];
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        PublicOfferOperation: {
+            readonly operation_type: components["schemas"]["OperationTypeEnum"];
+            /** @description Prix de l'opération ou du gaz (en FCFA). */
+            readonly gas_price: number;
+            /** @description Prix de la bouteille (Première bouteille uniquement, en FCFA). */
+            readonly bottle_price: number;
+            /** @description Montant de la consigne (Première bouteille uniquement, en FCFA). */
+            readonly deposit_amount: number;
+            readonly total_unit_price: number;
+        };
+        PublicPlatformSetting: {
+            timezone: string;
+            order_response_timeout_minutes: number;
+            order_pickup_timeout_minutes: number;
+            order_cutoff_before_close_minutes: number;
+            closing_soon_threshold_minutes: number;
+            max_quantity_per_order: number;
+            max_active_orders_per_customer: number;
+            no_show_threshold: number;
+            no_show_window_days: number;
+            suspension_duration_days: number;
+            /** Format: date-time */
+            server_now: string;
         };
         /**
          * @description * `NO_SHOW_THRESHOLD` - Seuil de retraits non effectués dépassé
@@ -393,6 +653,139 @@ export interface operations {
             };
         };
     };
+    catalog_brands_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Brand"][];
+                };
+            };
+        };
+    };
+    catalog_products_list: {
+        parameters: {
+            query?: {
+                brand?: string;
+                capacity_kg?: string;
+                /** @description Un numéro de page de l'ensemble des résultats. */
+                page?: number;
+                /** @description Nombre de résultats à retourner par page. */
+                page_size?: number;
+                /**
+                 * @description * `BUTANE` - Butane
+                 *     * `PROPANE` - Propane
+                 *     * `LPG` - GPL
+                 */
+                product_type?: "BUTANE" | "PROPANE" | "LPG";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedProductList"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depots_list: {
+        parameters: {
+            query?: {
+                brand?: string;
+                capacity_kg?: string;
+                lat?: number;
+                lng?: number;
+                open_now?: boolean;
+                /**
+                 * @description * `REFILL` - Recharge
+                 *     * `EXCHANGE` - Échange
+                 *     * `FIRST_ACQUISITION` - Première bouteille
+                 */
+                operation?: "REFILL" | "EXCHANGE" | "FIRST_ACQUISITION";
+                /** @description Un numéro de page de l'ensemble des résultats. */
+                page?: number;
+                /** @description Nombre de résultats à retourner par page. */
+                page_size?: number;
+                q?: string;
+                radius_km?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedPublicDepotListList"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depots_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                depot_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicDepotDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     health_retrieve: {
         parameters: {
             query?: never;
@@ -416,6 +809,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthCheck"];
+                };
+            };
+        };
+    };
+    settings_public_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicPlatformSetting"];
                 };
             };
         };
