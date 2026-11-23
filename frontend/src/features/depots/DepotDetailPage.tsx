@@ -104,7 +104,7 @@ export function DepotDetailPage() {
   const lastOrderHHMM = formatTimeHHMM(depot.last_order_time);
   const reopensHHMM = formatTimeHHMM(depot.reopens_at);
 
-  const directionsUrl = `https://www.openstreetmap.org/?mlat=${depot.latitude}&mlon=${depot.longitude}#map=16/${depot.latitude}/${depot.longitude}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${depot.latitude},${depot.longitude}`;
   const freshnessSource = depot.offers[0]?.updated_at ?? depot.updated_at;
 
   const canChoose = isOnline && depot.can_order && depot.offers.length > 0;

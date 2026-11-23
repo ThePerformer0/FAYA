@@ -45,7 +45,7 @@
     "cutoffExplanation": "Les commandes s'arrêtent {{minutes}} minutes avant la fermeture.",
     "closedExplanation": "Le dépôt est fermé. Il rouvre à {{time}}.",
     "hoursLabel": "Horaires",
-    "hoursEveryDay": "{{open}} – {{close}}, tous les jours",
+    "hoursEveryDay": "{{open}} à {{close}}, tous les jours",
     "contactLabel": "Contact",
     "call": "Appeler",
     "pickupLabel": "Retrait",

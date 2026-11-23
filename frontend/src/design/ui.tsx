@@ -231,7 +231,7 @@ export function FreshnessStamp({ updatedAt, serverNow, suffix }: FreshnessStampP
         <IconClock size={14} stroke={1.75} className="shrink-0" aria-hidden="true" />
         <span>
           {label}
-          {suffix ? ` — ${suffix}` : ""}
+          {suffix ? ` · ${suffix}` : ""}
         </span>
       </p>
     );
@@ -243,7 +243,7 @@ export function FreshnessStamp({ updatedAt, serverNow, suffix }: FreshnessStampP
         <IconClock size={14} stroke={1.75} className="shrink-0" aria-hidden="true" />
         <span>
           {t("freshness.check", { minutes })}
-          {suffix ? ` — ${suffix}` : ""}
+          {suffix ? ` · ${suffix}` : ""}
         </span>
       </p>
     );
@@ -261,7 +261,7 @@ export function FreshnessStamp({ updatedAt, serverNow, suffix }: FreshnessStampP
       <IconAlertTriangle size={14} stroke={1.75} className="shrink-0" aria-hidden="true" />
       <span>
         {staleText}
-        {suffix ? ` — ${suffix}` : ""}
+        {suffix ? ` · ${suffix}` : ""}
       </span>
     </p>
   );

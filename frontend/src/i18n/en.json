@@ -45,7 +45,7 @@
     "cutoffExplanation": "Orders stop {{minutes}} minutes before closing.",
     "closedExplanation": "The store is closed. It reopens at {{time}}.",
     "hoursLabel": "Hours",
-    "hoursEveryDay": "{{open}} – {{close}}, every day",
+    "hoursEveryDay": "{{open}} to {{close}}, every day",
     "contactLabel": "Contact",
     "call": "Call",
     "pickupLabel": "Pickup",
