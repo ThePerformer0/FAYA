@@ -1,1 +1,12 @@
-@import "tailwindcss";
+/* Polices auto-hébergées subsettées latin + latin étendu (DESIGN_SYSTEM §2.6) */
+@import "@fontsource/barlow/latin-400.css";
+@import "@fontsource/barlow/latin-ext-400.css";
+@import "@fontsource/barlow/latin-500.css";
+@import "@fontsource/barlow/latin-ext-500.css";
+@import "@fontsource/barlow/latin-700.css";
+@import "@fontsource/barlow/latin-ext-700.css";
+@import "@fontsource/barlow-condensed/latin-700.css";
+@import "@fontsource/barlow-condensed/latin-ext-700.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+@import "@fontsource/ibm-plex-mono/latin-ext-500.css";
+@import "./styles/tokens.css";

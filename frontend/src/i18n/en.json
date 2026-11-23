@@ -1,0 +1,174 @@
+{
+  "app": {
+    "name": "Faya",
+    "tagline": "Gas, without the wasted trip.",
+    "skipToContent": "Skip to main content"
+  },
+  "nav": {
+    "depots": "Stores",
+    "orders": "Order",
+    "profile": "Profile",
+    "depotPortal": "Store",
+    "login": "Sign in",
+    "back": "Back"
+  },
+  "language": {
+    "label": "Language",
+    "fr": "Français",
+    "en": "English",
+    "shortFr": "FR",
+    "shortEn": "EN"
+  },
+  "net": {
+    "offline": "Offline · data from {{time}}",
+    "offlineNoTime": "Offline · browse only",
+    "restored": "Back online",
+    "actionNeedsConnection": "This action needs a connection."
+  },
+  "geo": {
+    "useMyLocation": "Use my location",
+    "locating": "Locating…",
+    "located": "Location active",
+    "clearLocation": "Clear location",
+    "rationale": "Faya uses your location to find the nearest stores. You can also search by neighborhood.",
+    "denied": "Location not shared. Enter a neighborhood or an address.",
+    "unsupported": "Location isn't available on this device. Enter a neighborhood or an address."
+  },
+  "store": {
+    "status": {
+      "open": "Open until {{time}}",
+      "closingSoon": "Closes at {{time}}",
+      "closed": "Closed · reopens at {{time}}"
+    },
+    "reopensAt": "Reopens at {{time}}",
+    "lastOrderUntil": "Orders until {{time}}",
+    "cutoffExplanation": "Orders stop {{minutes}} minutes before closing.",
+    "closedExplanation": "The store is closed. It reopens at {{time}}.",
+    "hoursLabel": "Hours",
+    "hoursEveryDay": "{{open}} – {{close}}, every day",
+    "contactLabel": "Contact",
+    "call": "Call",
+    "pickupLabel": "Pickup",
+    "pickupPayment": "Pay at the store: cash or Mobile Money",
+    "directions": "Directions",
+    "productsTitle": "Products",
+    "fromPrice": "from {{price}}",
+    "noActiveOffers": "No active offers listed right now.",
+    "noActiveOperations": "Prices being updated",
+    "exchangeAcceptedBrands": "Empty brands accepted for exchange",
+    "noExchangeBrands": "No exchange brands listed.",
+    "availabilityDisclaimer": "Availability is not a reservation.",
+    "showMap": "Map",
+    "hideMap": "Hide map",
+    "chooseAction": "Choose",
+    "chooseOperationTitle": "Prices and options",
+    "orderingComingSoon": "Online reservation arrives in the next milestone. You can check prices and call the store directly.",
+    "notFoundTitle": "Store not found",
+    "notFoundBody": "This store is no longer active or the link is invalid."
+  },
+  "operation": {
+    "REFILL": "Refill",
+    "EXCHANGE": "Exchange",
+    "FIRST_ACQUISITION": "First bottle",
+    "desc": {
+      "REFILL": "You bring an empty bottle of the same brand.",
+      "EXCHANGE": "You bring an empty bottle of another brand.",
+      "FIRST_ACQUISITION": "You buy a full bottle without bringing an empty one."
+    },
+    "priceLines": {
+      "gas": "Gas",
+      "bottle": "Bottle",
+      "deposit": "Deposit",
+      "total": "Total at store"
+    }
+  },
+  "search": {
+    "title": "Gas stores",
+    "placeholder": "Neighborhood or address (e.g. Akwa, Bonabéri)",
+    "label": "Neighborhood or address",
+    "clearSearch": "Clear search",
+    "openNow": "Open now",
+    "allBrands": "All brands",
+    "brandFilter": "Brand",
+    "capacityFilter": "Size",
+    "operationFilter": "Option",
+    "resetFilters": "Clear filters",
+    "resultsCount_one": "{{count}} store found",
+    "resultsCount_other": "{{count}} stores found",
+    "viewMap": "Map",
+    "viewList": "List",
+    "openDepot": "Open details",
+    "loadMore": "Show more stores",
+    "emptyTitle": "No stores nearby",
+    "emptyBody": "No store matches your filters. Try another neighborhood or remove a filter."
+  },
+  "freshness": {
+    "recent": "Updated {{minutes}} min ago",
+    "justNow": "Updated just now",
+    "check": "Updated {{minutes}} min ago · verify",
+    "staleHours": "Not verified for {{hours}} h",
+    "staleDays": "Not verified for {{days}} d"
+  },
+  "orders": {
+    "title": "Order",
+    "emptyTitle": "No orders yet",
+    "emptyBody": "When you reserve a bottle, it will appear here with its pickup deadline.",
+    "findDepot": "Find a store"
+  },
+  "errors": {
+    "networkTitle": "No connection",
+    "networkBody": "Check your network and try again.",
+    "serverTitle": "Something went wrong on our side",
+    "serverBody": "Try again in a moment.",
+    "forbiddenTitle": "Access denied",
+    "forbiddenBody": "You don't have access to this page.",
+    "retry": "Try again",
+    "backHome": "Back to stores",
+    "close": "Close"
+  },
+  "auth": {
+    "loginTitle": "Sign in",
+    "loginSubtitle": "Access your reservations or your store portal.",
+    "loginAction": "Sign in",
+    "loginSubmitting": "Sending…",
+    "noAccount": "No account yet?",
+    "createAccountLink": "Create a customer account",
+    "registerTitle": "Create a customer account",
+    "registerSubtitle": "Your phone number lets the store reach you for pickup.",
+    "registerAction": "Create my account",
+    "registerSubmitting": "Sending…",
+    "alreadyAccount": "Already have an account?",
+    "loginLink": "Sign in",
+    "profileTitle": "My profile",
+    "profileUpdated": "Profile saved.",
+    "saveAction": "Save",
+    "saving": "Sending…",
+    "logout": "Sign out",
+    "checkingSession": "Checking session…",
+    "suspensionBanner": "You can't place orders until {{date}}. You can still browse stores.",
+    "fields": {
+      "fullName": "Full name",
+      "email": "Email address",
+      "phone": "Phone (international format)",
+      "phoneHint": "Cameroon example: +237699123456",
+      "password": "Password",
+      "passwordHint": "At least 8 characters."
+    },
+    "validation": {
+      "fullNameRequired": "Enter your full name.",
+      "emailInvalid": "Invalid email address.",
+      "phoneInvalid": "International format required (e.g. +237699123456).",
+      "passwordRequired": "Password is required.",
+      "passwordMin": "At least 8 characters."
+    },
+    "roles": {
+      "CUSTOMER": "Customer",
+      "DEPOT_MANAGER": "Store manager",
+      "ADMIN": "Administrator"
+    }
+  },
+  "depotPortal": {
+    "title": "Store manager portal",
+    "body": "Protected access verified. Stock, offers and order queue arrive in the next milestones."
+  }
+}

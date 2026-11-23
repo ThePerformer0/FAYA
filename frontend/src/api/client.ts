@@ -1,5 +1,6 @@
 import createClient from "openapi-fetch";
 
+import { getActiveLanguage } from "../i18n";
 import type { paths } from "./schema";
 import { clearAccessToken, getAccessToken, setAccessToken } from "./tokenStore";
 
@@ -80,6 +81,7 @@ const authFetch: typeof fetch = async (input, init) => {
   const buildRequest = (token: string | null): Request => {
     const req = originalRequest.clone();
     const headers = new Headers(req.headers);
+    headers.set("Accept-Language", getActiveLanguage());
     if (token && !skipRetry) {
       headers.set("Authorization", `Bearer ${token}`);
     }

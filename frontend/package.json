@@ -12,18 +12,26 @@
     "api:types": "openapi-typescript src/api/schema.yaml -o src/api/schema.d.ts"
   },
   "dependencies": {
+    "@fontsource/barlow": "^5.3.0",
+    "@fontsource/barlow-condensed": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
     "@hookform/resolvers": "^5.0.1",
+    "@tabler/icons-react": "^3.52.0",
     "@tanstack/react-query": "^5.71.0",
+    "i18next": "^27.2.5",
+    "leaflet": "^1.9.4",
     "openapi-fetch": "^0.13.7",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.55.0",
+    "react-i18next": "^18.0.3",
     "react-router-dom": "^7.5.0",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.24.0",
     "@tailwindcss/vite": "^4.1.3",
+    "@types/leaflet": "^1.9.22",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
     "@vitejs/plugin-react": "^4.4.0",

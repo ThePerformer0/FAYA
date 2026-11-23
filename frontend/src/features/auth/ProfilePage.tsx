@@ -1,25 +1,37 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { IconCheck } from "@tabler/icons-react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 import { apiClient, extractApiError } from "../../api/client";
+import { formatShortDate } from "../../design/formatters";
+import { Button, ErrorBanner, FilterChip, TextField } from "../../design/ui";
+import { getActiveLanguage, setAppLanguage } from "../../i18n";
 import { useAuth } from "./AuthContext";
 
-const profileSchema = z.object({
-  full_name: z.string().min(2, "Veuillez indiquer votre nom complet."),
-  phone: z
-    .string()
-    .regex(/^\+[1-9]\d{7,14}$/, "Format international requis (ex. +2250701020304)."),
-});
-
-type ProfileFormValues = z.infer<typeof profileSchema>;
+interface ProfileFormValues {
+  full_name: string;
+  phone: string;
+}
 
 export function ProfilePage() {
+  const { t, i18n } = useTranslation();
   const { user, refreshUser, logout } = useAuth();
   const navigate = useNavigate();
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const activeLang = getActiveLanguage();
+
+  const profileSchema = useMemo(
+    () =>
+      z.object({
+        full_name: z.string().min(2, t("auth.validation.fullNameRequired")),
+        phone: z.string().regex(/^\+[1-9]\d{7,14}$/, t("auth.validation.phoneInvalid")),
+      }),
+    [t],
+  );
 
   const {
     register,
@@ -44,7 +56,7 @@ export function ProfilePage() {
       return;
     }
     await refreshUser();
-    setFeedback({ type: "ok", text: "Profil mis à jour." });
+    setFeedback({ type: "ok", text: t("auth.profileUpdated") });
   };
 
   const handleLogout = async () => {
@@ -53,84 +65,103 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Mon profil</h1>
-          <p className="text-sm text-slate-500">{user.email}</p>
+    <div className="mx-auto w-full max-w-lg px-4 py-6 space-y-4">
+      <div className="rounded-lg border-card border-border-strong bg-bg p-5">
+        <div className="flex flex-wrap items-start justify-between gap-2 border-b border-divider pb-4">
+          <div>
+            <h1 className="font-display text-2xl font-bold uppercase tracking-[0.5px] text-text">
+              {t("auth.profileTitle")}
+            </h1>
+            <p className="mt-1 text-sm text-text-secondary">{user.email}</p>
+          </div>
+          <span className="inline-flex min-h-7 items-center rounded-sm border-card border-border-strong px-2 text-xs font-bold uppercase text-text">
+            {t(`auth.roles.${user.role}`)}
+          </span>
         </div>
-        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
-          {user.role}
-        </span>
-      </div>
 
-      {user.active_suspension && (
-        <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-          Votre capacité de commande est temporairement suspendue jusqu&apos;au{" "}
-          <strong>{new Date(user.active_suspension.ends_at).toLocaleString("fr-FR")}</strong>.
-        </div>
-      )}
+        {user.active_suspension && (
+          <div className="mt-4">
+            <ErrorBanner
+              message={t("auth.suspensionBanner", {
+                date: formatShortDate(user.active_suspension.ends_at, i18n.language),
+              })}
+            />
+          </div>
+        )}
 
-      {feedback && (
-        <div
-          role="status"
-          className={`mt-4 rounded-lg px-3 py-2 text-sm ${
-            feedback.type === "ok"
-              ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border border-red-200 bg-red-50 text-red-700"
-          }`}
-        >
-          {feedback.text}
-        </div>
-      )}
+        {feedback?.type === "err" && (
+          <div className="mt-4">
+            <ErrorBanner message={feedback.text} />
+          </div>
+        )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-4" noValidate>
-        <div>
-          <label htmlFor="full_name" className="block text-sm font-medium text-slate-700">
-            Nom complet
-          </label>
-          <input
+        {feedback?.type === "ok" && (
+          <div
+            role="status"
+            className="mt-4 flex items-center gap-2 rounded-md border-card border-border-strong bg-surface-muted px-3 py-2.5 text-sm font-bold text-text"
+          >
+            <IconCheck size={18} stroke={2} aria-hidden="true" />
+            <span>{feedback.text}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-4" noValidate>
+          <TextField
             id="full_name"
             type="text"
+            autoComplete="name"
+            label={t("auth.fields.fullName")}
+            error={errors.full_name?.message}
             {...register("full_name")}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
           />
-          {errors.full_name && (
-            <p className="mt-1 text-xs text-red-600">{errors.full_name.message}</p>
-          )}
-        </div>
 
-        <div>
-          <label htmlFor="phone" className="block text-sm font-medium text-slate-700">
-            Téléphone
-          </label>
-          <input
+          <TextField
             id="phone"
             type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            label={t("auth.fields.phone")}
+            hint={t("auth.fields.phoneHint")}
+            error={errors.phone?.message}
             {...register("phone")}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
           />
-          {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone.message}</p>}
-        </div>
 
-        <div className="flex items-center justify-between pt-2">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 disabled:opacity-50"
-          >
-            {isSubmitting ? "Enregistrement..." : "Enregistrer"}
-          </button>
+          <div className="flex flex-col gap-3 pt-2">
+            <Button
+              type="submit"
+              variant="primary"
+              fullWidth
+              isLoading={isSubmitting}
+              loadingLabel={t("auth.saving")}
+            >
+              {t("auth.saveAction")}
+            </Button>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100"
-          >
-            Se déconnecter
-          </button>
+            <Button type="button" variant="secondary" fullWidth onClick={handleLogout}>
+              {t("auth.logout")}
+            </Button>
+          </div>
+        </form>
+      </div>
+
+      {/* Sélecteur de langue FR / EN dans Profil (DESIGN_SYSTEM §3.3 & §6) */}
+      <div className="rounded-lg border-card border-border-strong bg-bg p-5">
+        <h2 className="font-display text-lg font-bold uppercase tracking-[0.5px] text-text">
+          {t("language.label")}
+        </h2>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <FilterChip
+            label={t("language.fr")}
+            selected={activeLang === "fr"}
+            onClick={() => setAppLanguage("fr")}
+          />
+          <FilterChip
+            label={t("language.en")}
+            selected={activeLang === "en"}
+            onClick={() => setAppLanguage("en")}
+          />
         </div>
-      </form>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,174 @@
+{
+  "app": {
+    "name": "Faya",
+    "tagline": "Le gaz, sans courir pour rien.",
+    "skipToContent": "Aller au contenu principal"
+  },
+  "nav": {
+    "depots": "Dépôts",
+    "orders": "Commande",
+    "profile": "Profil",
+    "depotPortal": "Dépôt",
+    "login": "Connexion",
+    "back": "Retour"
+  },
+  "language": {
+    "label": "Langue",
+    "fr": "Français",
+    "en": "English",
+    "shortFr": "FR",
+    "shortEn": "EN"
+  },
+  "net": {
+    "offline": "Hors ligne · données de {{time}}",
+    "offlineNoTime": "Hors ligne · consultation seulement",
+    "restored": "Connexion rétablie",
+    "actionNeedsConnection": "Cette action demande une connexion."
+  },
+  "geo": {
+    "useMyLocation": "Me localiser",
+    "locating": "Localisation…",
+    "located": "Position active",
+    "clearLocation": "Retirer la position",
+    "rationale": "Faya utilise votre position pour trouver les dépôts les plus proches. Vous pouvez aussi chercher par quartier.",
+    "denied": "Position non partagée. Saisissez un quartier ou une adresse.",
+    "unsupported": "La géolocalisation n'est pas disponible sur cet appareil. Saisissez un quartier ou une adresse."
+  },
+  "store": {
+    "status": {
+      "open": "Ouvert jusqu'à {{time}}",
+      "closingSoon": "Ferme à {{time}}",
+      "closed": "Fermé · rouvre à {{time}}"
+    },
+    "reopensAt": "Rouvre à {{time}}",
+    "lastOrderUntil": "Commandes jusqu'à {{time}}",
+    "cutoffExplanation": "Les commandes s'arrêtent {{minutes}} minutes avant la fermeture.",
+    "closedExplanation": "Le dépôt est fermé. Il rouvre à {{time}}.",
+    "hoursLabel": "Horaires",
+    "hoursEveryDay": "{{open}} – {{close}}, tous les jours",
+    "contactLabel": "Contact",
+    "call": "Appeler",
+    "pickupLabel": "Retrait",
+    "pickupPayment": "Paiement au dépôt : espèces ou Mobile Money",
+    "directions": "Itinéraire",
+    "productsTitle": "Produits",
+    "fromPrice": "dès {{price}}",
+    "noActiveOffers": "Aucune offre active renseignée pour le moment.",
+    "noActiveOperations": "Tarifs en cours de mise à jour",
+    "exchangeAcceptedBrands": "Marques vides acceptées en échange",
+    "noExchangeBrands": "Aucune marque d'échange précisée.",
+    "availabilityDisclaimer": "La disponibilité n'est pas une réservation.",
+    "showMap": "Carte",
+    "hideMap": "Masquer la carte",
+    "chooseAction": "Choisir",
+    "chooseOperationTitle": "Tarifs et opérations",
+    "orderingComingSoon": "La réservation en ligne arrive au prochain jalon. Vous pouvez consulter les tarifs et appeler le dépôt directement.",
+    "notFoundTitle": "Dépôt introuvable",
+    "notFoundBody": "Ce dépôt n'est plus actif ou l'adresse est incorrecte."
+  },
+  "operation": {
+    "REFILL": "Recharge",
+    "EXCHANGE": "Échange",
+    "FIRST_ACQUISITION": "Première bouteille",
+    "desc": {
+      "REFILL": "Vous rapportez une bouteille vide de même marque.",
+      "EXCHANGE": "Vous rapportez une bouteille vide d'une autre marque.",
+      "FIRST_ACQUISITION": "Vous achetez une bouteille pleine, sans rien rapporter."
+    },
+    "priceLines": {
+      "gas": "Gaz",
+      "bottle": "Bouteille",
+      "deposit": "Consigne",
+      "total": "Total au dépôt"
+    }
+  },
+  "search": {
+    "title": "Dépôts de gaz",
+    "placeholder": "Quartier ou adresse (ex. Akwa, Bonabéri)",
+    "label": "Quartier ou adresse",
+    "clearSearch": "Effacer la recherche",
+    "openNow": "Ouvert maintenant",
+    "allBrands": "Toutes les marques",
+    "brandFilter": "Marque",
+    "capacityFilter": "Capacité",
+    "operationFilter": "Opération",
+    "resetFilters": "Retirer les filtres",
+    "resultsCount_one": "{{count}} dépôt trouvé",
+    "resultsCount_other": "{{count}} dépôts trouvés",
+    "viewMap": "Carte",
+    "viewList": "Liste",
+    "openDepot": "Voir la fiche",
+    "loadMore": "Afficher plus de dépôts",
+    "emptyTitle": "Aucun dépôt par ici",
+    "emptyBody": "Aucun dépôt ne correspond à vos filtres. Essayez un autre quartier ou retirez un filtre."
+  },
+  "freshness": {
+    "recent": "Mis à jour il y a {{minutes}} min",
+    "justNow": "Mis à jour à l'instant",
+    "check": "Mis à jour il y a {{minutes}} min · à vérifier",
+    "staleHours": "Données non vérifiées depuis {{hours}} h",
+    "staleDays": "Données non vérifiées depuis {{days}} j"
+  },
+  "orders": {
+    "title": "Commande",
+    "emptyTitle": "Pas encore de commande",
+    "emptyBody": "Quand vous réserverez une bouteille, elle apparaîtra ici avec son heure de retrait.",
+    "findDepot": "Trouver un dépôt"
+  },
+  "errors": {
+    "networkTitle": "Pas de connexion",
+    "networkBody": "Vérifiez votre réseau et réessayez.",
+    "serverTitle": "Un problème est survenu de notre côté",
+    "serverBody": "Réessayez dans un instant.",
+    "forbiddenTitle": "Accès non autorisé",
+    "forbiddenBody": "Vous n'avez pas accès à cette page.",
+    "retry": "Réessayer",
+    "backHome": "Retour aux dépôts",
+    "close": "Fermer"
+  },
+  "auth": {
+    "loginTitle": "Connexion",
+    "loginSubtitle": "Accédez à vos réservations ou à l'espace de votre dépôt.",
+    "loginAction": "Se connecter",
+    "loginSubmitting": "Envoi…",
+    "noAccount": "Pas encore de compte ?",
+    "createAccountLink": "Créer un compte client",
+    "registerTitle": "Créer un compte client",
+    "registerSubtitle": "Votre numéro de téléphone permet au dépôt de vous joindre pour le retrait.",
+    "registerAction": "Créer mon compte",
+    "registerSubmitting": "Envoi…",
+    "alreadyAccount": "Déjà inscrit ?",
+    "loginLink": "Se connecter",
+    "profileTitle": "Mon profil",
+    "profileUpdated": "Profil enregistré.",
+    "saveAction": "Enregistrer",
+    "saving": "Envoi…",
+    "logout": "Se déconnecter",
+    "checkingSession": "Vérification de la session…",
+    "suspensionBanner": "Vous ne pouvez plus commander jusqu'au {{date}}. Vous pouvez toujours chercher des dépôts.",
+    "fields": {
+      "fullName": "Nom complet",
+      "email": "Adresse e-mail",
+      "phone": "Téléphone (format international)",
+      "phoneHint": "Exemple Cameroun : +237699123456",
+      "password": "Mot de passe",
+      "passwordHint": "8 caractères minimum."
+    },
+    "validation": {
+      "fullNameRequired": "Indiquez votre nom complet.",
+      "emailInvalid": "Adresse e-mail invalide.",
+      "phoneInvalid": "Format international requis (ex. +237699123456).",
+      "passwordRequired": "Le mot de passe est obligatoire.",
+      "passwordMin": "Minimum 8 caractères."
+    },
+    "roles": {
+      "CUSTOMER": "Client",
+      "DEPOT_MANAGER": "Responsable de dépôt",
+      "ADMIN": "Administrateur"
+    }
+  },
+  "depotPortal": {
+    "title": "Espace Responsable de dépôt",
+    "body": "Accès protégé validé. La gestion du stock, des offres et des commandes arrive aux prochains jalons."
+  }
+}

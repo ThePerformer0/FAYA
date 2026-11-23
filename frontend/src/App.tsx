@@ -1,41 +1,27 @@
+import { useTranslation } from "react-i18next";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
-import { AuthProvider, useAuth } from "./features/auth/AuthContext";
+import { AuthProvider } from "./features/auth/AuthContext";
 import { LoginPage } from "./features/auth/LoginPage";
 import { ProfilePage } from "./features/auth/ProfilePage";
 import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 import { RegisterPage } from "./features/auth/RegisterPage";
+import { DepotDetailPage } from "./features/depots/DepotDetailPage";
+import { DepotsPage } from "./features/depots/DepotsPage";
+import { OrdersPage } from "./features/orders/OrdersPage";
 import { Layout } from "./shared/Layout";
 import { NetworkProvider } from "./shared/NetworkContext";
 
-function HomePage() {
-  const { user } = useAuth();
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h1 className="text-2xl font-bold text-slate-900">
-        Trouvez votre bouteille de gaz avant de vous déplacer
-      </h1>
-      <p className="mt-2 text-sm text-slate-600">
-        Socle Jalon 0 opérationnel. La recherche géographique et la carte Leaflet arrivent au
-        Jalon 1.
-      </p>
-      {user && (
-        <p className="mt-4 text-sm text-emerald-700">
-          Connecté en tant que <strong>{user.full_name}</strong> ({user.role}).
-        </p>
-      )}
-    </div>
-  );
-}
-
 function DepotPortalPlaceholder() {
+  const { t } = useTranslation();
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h1 className="text-xl font-bold text-slate-900">Espace Responsable de dépôt</h1>
-      <p className="mt-2 text-sm text-slate-600">
-        Accès protégé validé (rôle <code>DEPOT_MANAGER</code>). La gestion des stocks et des
-        offres arrive au Jalon 2.
-      </p>
+    <div className="mx-auto w-full max-w-xl px-4 py-6">
+      <div className="rounded-lg border-card border-border-strong bg-bg p-5">
+        <h1 className="font-display text-2xl font-bold uppercase tracking-[0.5px] text-text">
+          {t("depotPortal.title")}
+        </h1>
+        <p className="mt-2 text-base text-text-secondary">{t("depotPortal.body")}</p>
+      </div>
     </div>
   );
 }
@@ -47,7 +33,9 @@ export function App() {
         <BrowserRouter>
           <Routes>
             <Route element={<Layout />}>
-              <Route path="/" element={<HomePage />} />
+              <Route path="/" element={<DepotsPage />} />
+              <Route path="/depots/:depotId" element={<DepotDetailPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
 
