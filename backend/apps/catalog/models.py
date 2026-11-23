@@ -6,8 +6,9 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import Q
-from django.db.models.functions import Lower
+from django.db.models import Q, Value
+from django.db.models.functions import Lower, Trim
+from django.db.models.lookups import Exact
 
 from apps.core.models import TimeStampedUUIDModel
 
@@ -15,7 +16,7 @@ from apps.core.models import TimeStampedUUIDModel
 class Brand(TimeStampedUUIDModel):
     """Marque de bouteille de gaz du référentiel commun."""
 
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, db_collation="und-x-icu")
     logo_url = models.URLField(blank=True, default="")
     is_active = models.BooleanField(default=True, db_index=True)
 
@@ -29,13 +30,18 @@ class Brand(TimeStampedUUIDModel):
                 name="catalog_brand_unique_name_ci",
             ),
             models.CheckConstraint(
-                condition=~Q(name=""),
+                condition=~Q(Exact(Trim("name"), Value(""))),
                 name="catalog_brand_name_not_empty",
             ),
         ]
 
     def __str__(self) -> str:
         return self.name
+
+    def clean(self) -> None:
+        super().clean()
+        if not self.name or not self.name.strip():
+            raise ValidationError({"name": "Le nom de la marque est obligatoire."})
 
     def save(self, *args, **kwargs) -> None:
         if self.name:
@@ -107,6 +113,11 @@ class Product(TimeStampedUUIDModel):
     def __str__(self) -> str:
         return f"{self.brand.name} · {self.capacity_kg:g} kg ({self.get_product_type_display()})"
 
+    def clean(self) -> None:
+        super().clean()
+        if not self.name or not self.name.strip():
+            raise ValidationError({"name": "Le nom du produit est obligatoire."})
+
     def save(self, *args, **kwargs) -> None:
         if self.name:
             self.name = self.name.strip()
@@ -138,7 +149,7 @@ class ProductProposal(TimeStampedUUIDModel):
         choices=ProductType.choices,
         default=ProductType.BUTANE,
     )
-    name = models.CharField(max_length=150, blank=True, default="")
+    name = models.CharField(max_length=150)
     description = models.TextField(blank=True, default="")
     status = models.CharField(
         max_length=20,
@@ -179,5 +190,17 @@ class ProductProposal(TimeStampedUUIDModel):
 
     def clean(self) -> None:
         super().clean()
+        errors: dict[str, str] = {}
         if not self.proposed_brand_name or not self.proposed_brand_name.strip():
-            raise ValidationError({"proposed_brand_name": "Le nom de la marque est obligatoire."})
+            errors["proposed_brand_name"] = "Le nom de la marque est obligatoire."
+        if not self.name or not self.name.strip():
+            errors["name"] = "Le nom du produit est obligatoire."
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs) -> None:
+        if self.proposed_brand_name:
+            self.proposed_brand_name = self.proposed_brand_name.strip()
+        if self.name:
+            self.name = self.name.strip()
+        super().save(*args, **kwargs)
