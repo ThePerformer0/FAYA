@@ -25,7 +25,7 @@ class PublicDepotListView(ListAPIView):
 
     def _get_query_params(self) -> dict:
         if not hasattr(self, "_validated_params"):
-            serializer = DepotSearchQuerySerializer(data=self.request.query_params)
+            serializer = DepotSearchQuerySerializer(data=self.request.query_params.dict())
             serializer.is_valid(raise_exception=True)
             self._validated_params = serializer.validated_data
         return self._validated_params

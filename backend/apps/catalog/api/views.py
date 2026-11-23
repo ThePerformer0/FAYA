@@ -37,7 +37,7 @@ class ProductListView(ListAPIView):
     serializer_class = ProductSerializer
 
     def get_queryset(self):
-        query = ProductFilterQuerySerializer(data=self.request.query_params)
+        query = ProductFilterQuerySerializer(data=self.request.query_params.dict())
         query.is_valid(raise_exception=True)
         params = query.validated_data
         return selectors.list_published_products(

@@ -4,7 +4,9 @@ from django.conf import settings
 from django.contrib.gis.db import models as gis_models
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import F, Q
+from django.db.models import F, Q, Value
+from django.db.models.functions import Trim
+from django.db.models.lookups import Exact
 
 from apps.accounts.models import UserRole, phone_e164_validator
 from apps.catalog.models import Brand, Product
@@ -66,7 +68,7 @@ class Depot(TimeStampedUUIDModel):
                 name="depots_depot_closing_after_opening",
             ),
             models.CheckConstraint(
-                condition=~Q(name=""),
+                condition=~Q(Exact(Trim("name"), Value(""))),
                 name="depots_depot_name_not_empty",
             ),
         ]
@@ -84,13 +86,22 @@ class Depot(TimeStampedUUIDModel):
             self.address = self.address.strip()
         if self.neighborhood:
             self.neighborhood = self.neighborhood.strip()
-        if self.phone:
-            self.phone = self.phone.strip()
         super().save(*args, **kwargs)
 
     def clean(self) -> None:
         super().clean()
         errors: dict[str, str] = {}
+
+        if not self.name or not self.name.strip():
+            errors["name"] = "Le nom du dépôt est obligatoire."
+
+        if not self.address or not self.address.strip():
+            errors["address"] = "L'adresse du dépôt est obligatoire."
+
+        if self.location is not None:
+            lng, lat = float(self.location.x), float(self.location.y)
+            if not (-90.0 <= lat <= 90.0) or not (-180.0 <= lng <= 180.0):
+                errors["location"] = "Coordonnées GPS hors bornes WGS84 (lat [-90, 90], lng [-180, 180])."
 
         if self.opening_time and self.closing_time and self.closing_time <= self.opening_time:
             errors["closing_time"] = "L'heure de fermeture doit être postérieure à l'ouverture."

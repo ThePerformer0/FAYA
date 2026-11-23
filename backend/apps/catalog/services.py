@@ -1,6 +1,7 @@
 """Services métier du catalogue central (validation/refus des propositions produits)."""
 
 from django.db import IntegrityError, transaction
+from django.db.models.functions import Lower
 from django.utils import timezone
 
 from apps.accounts.models import User
@@ -35,13 +36,15 @@ def approve_product_proposal(
         )
 
     brand_name = locked.proposed_brand_name.strip()
-    brand = Brand.objects.filter(name__iexact=brand_name).first()
+    folded_name = brand_name.lower()
+    brand_qs = Brand.objects.annotate(name_folded=Lower("name"))
+    brand = brand_qs.filter(name_folded=folded_name).first()
     if brand is None:
         try:
             with transaction.atomic():
                 brand = Brand.objects.create(name=brand_name, is_active=True)
         except IntegrityError:
-            brand = Brand.objects.get(name__iexact=brand_name)
+            brand = brand_qs.get(name_folded=folded_name)
     if not brand.is_active:
         brand.is_active = True
         brand.save(update_fields=["is_active", "updated_at"])
