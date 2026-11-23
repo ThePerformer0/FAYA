@@ -12,6 +12,7 @@ class PlatformSettingAdmin(admin.ModelAdmin):
         "order_response_timeout_minutes",
         "order_pickup_timeout_minutes",
         "order_cutoff_before_close_minutes",
+        "closing_soon_threshold_minutes",
         "max_quantity_per_order",
         "no_show_threshold",
         "suspension_duration_days",

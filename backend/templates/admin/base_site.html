@@ -1,0 +1,24 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Faya Administration{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'admin/css/faya-admin.css' %}">
+{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+  <a href="{% url 'admin:index' %}" class="faya-brand-wrap">
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M16 2C11.2 8.2 7 13.4 7 19.5C7 24.7 11 29 16 29C21 29 25 24.7 25 19.5C25 13.4 20.8 8.2 16 2Z" fill="#F42902"/>
+      <rect x="12.5" y="14" width="7" height="10.5" rx="2.5" fill="#FDFDFF"/>
+      <rect x="14" y="11.5" width="4" height="2.5" rx="0.8" fill="#FDFDFF"/>
+    </svg>
+    <span>FAYA — ADMINISTRATION</span>
+  </a>
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

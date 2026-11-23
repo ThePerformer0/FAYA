@@ -7,7 +7,7 @@ from apps.core.models import PlatformSetting
 pytestmark = [pytest.mark.unit, pytest.mark.django_db]
 
 DEFAULTS = {
-    "timezone": "Africa/Abidjan",
+    "timezone": "Africa/Douala",
     "order_response_timeout_minutes": 15,
     "order_pickup_timeout_minutes": 120,
     "order_cutoff_before_close_minutes": 30,

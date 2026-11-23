@@ -1,6 +1,7 @@
 # Documents internes de pilotage (ne jamais pousser sur GitHub)
 CDC.md
 SUIVI_PROJET.md
+DESIGN_SYSTEM.md
 .pgdata/
 
 # Secrets et variables d'environnement

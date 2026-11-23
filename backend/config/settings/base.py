@@ -1,5 +1,6 @@
 """Configuration de base Django pour le monolithe modulaire Faya."""
 
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -11,7 +12,7 @@ REPO_ROOT = BASE_DIR.parent
 env = environ.Env(
     DJANGO_DEBUG=(bool, False),
     DJANGO_ALLOWED_HOSTS=(list, ["localhost", "127.0.0.1"]),
-    DJANGO_TIME_ZONE=(str, "Africa/Abidjan"),
+    DJANGO_TIME_ZONE=(str, "Africa/Douala"),
     POSTGRES_DB=(str, "faya"),
     POSTGRES_USER=(str, "faya"),
     POSTGRES_PASSWORD=(str, "faya_dev_password"),
@@ -34,6 +35,30 @@ CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
 
 USE_POSTGIS = env("USE_POSTGIS")
 
+# Sous Windows natif, résolution automatique des DLL GDAL/GEOS fournies par PostgreSQL/PostGIS
+if USE_POSTGIS and os.name == "nt":
+    GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH", default="")
+    GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH", default="")
+
+    if not (GDAL_LIBRARY_PATH and GEOS_LIBRARY_PATH):
+        for pg_dir in (
+            Path(r"C:\Program Files\PostgreSQL\18\bin"),
+            Path(r"C:\Program Files\PostgreSQL\16\bin"),
+            Path(r"C:\Program Files\PostgreSQL\13\bin"),
+            Path(r"C:\OSGeo4W\bin"),
+        ):
+            if not pg_dir.exists():
+                continue
+            gdal_candidates = sorted(pg_dir.glob("libgdal*.dll")) + sorted(pg_dir.glob("gdal*.dll"))
+            geos_candidates = sorted(pg_dir.glob("libgeos_c*.dll")) + sorted(pg_dir.glob("geos_c*.dll"))
+            if gdal_candidates and geos_candidates:
+                os.add_dll_directory(str(pg_dir))
+                GDAL_LIBRARY_PATH = GDAL_LIBRARY_PATH or str(gdal_candidates[0])
+                GEOS_LIBRARY_PATH = GEOS_LIBRARY_PATH or str(geos_candidates[0])
+                break
+    else:
+        os.add_dll_directory(str(Path(GDAL_LIBRARY_PATH).parent))
+
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -55,6 +80,8 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "apps.core",
     "apps.accounts",
+    "apps.catalog",
+    "apps.depots",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -74,7 +101,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -133,6 +160,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

@@ -1,0 +1,100 @@
+/* Habillage Django Admin aux tokens Faya (DESIGN_SYSTEM.md §8) */
+:root {
+  --primary: #1C1814;
+  --secondary: #1C1814;
+  --accent: #F42902;
+  --primary-fg: #FDFDFF;
+  --body-fg: #1C1814;
+  --body-bg: #FDFDFF;
+  --body-quiet-color: #5A524B;
+  --body-loud-color: #1C1814;
+  --header-color: #FDFDFF;
+  --header-branding-color: #FDFDFF;
+  --header-bg: #1C1814;
+  --header-link-color: #FDFDFF;
+  --breadcrumbs-fg: #D9D2CB;
+  --breadcrumbs-link-fg: #FDFDFF;
+  --breadcrumbs-bg: #3A332D;
+  --link-fg: #B81D00;
+  --link-hover-color: #7A1300;
+  --link-selected-fg: #B81D00;
+  --hairline-color: #E8E2DC;
+  --border-color: #D9D2CB;
+  --darkened-bg: #F4F0EC;
+  --selected-bg: #E8E2DC;
+  --selected-row: #F4F0EC;
+  --button-fg: #FDFDFF;
+  --button-bg: #1C1814;
+  --button-hover-bg: #3A332D;
+  --default-button-bg: #F42902;
+  --default-button-hover-bg: #B81D00;
+  --close-button-bg: #5A524B;
+  --delete-button-bg: #A1121F;
+  --delete-button-hover-bg: #7A0D17;
+  --error-fg: #A1121F;
+  --message-error-bg: #FDECEC;
+  --message-warning-bg: #F4F0EC;
+  --message-success-bg: #F4F0EC;
+  --font-family-primary: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+#header #branding h1,
+.module h2,
+.module caption {
+  font-family: "Barlow Condensed", "Arial Narrow", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.faya-brand-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.faya-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.faya-badge--pending {
+  background: #FDFDFF;
+  color: #1C1814;
+  border: 1.5px dashed #1C1814;
+}
+
+.faya-badge--active,
+.faya-badge--confirmed,
+.faya-badge--published {
+  background: #1C1814;
+  color: #FDFDFF;
+}
+
+.faya-badge--pickedup,
+.faya-badge--approved {
+  background: #FDFDFF;
+  color: #1C1814;
+  border: 1.5px solid #1C1814;
+}
+
+.faya-badge--refused,
+.faya-badge--rejected,
+.faya-badge--suspended {
+  background: #FDECEC;
+  color: #A1121F;
+}
+
+.faya-badge--expired,
+.faya-badge--cancelled,
+.faya-badge--disabled,
+.faya-badge--draft,
+.faya-badge--archived {
+  background: #F4F0EC;
+  color: #5A524B;
+}

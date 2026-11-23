@@ -26,7 +26,7 @@ class PlatformSetting(models.Model):
     id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
     timezone = models.CharField(
         max_length=64,
-        default="Africa/Abidjan",
+        default="Africa/Douala",
         help_text="Fuseau horaire unique utilisé pour les horaires des dépôts.",
     )
     order_response_timeout_minutes = models.PositiveSmallIntegerField(
@@ -40,6 +40,10 @@ class PlatformSetting(models.Model):
     order_cutoff_before_close_minutes = models.PositiveSmallIntegerField(
         default=30,
         help_text="Arrêt des prises de commande avant la fermeture du dépôt (minutes).",
+    )
+    closing_soon_threshold_minutes = models.PositiveSmallIntegerField(
+        default=60,
+        help_text="Seuil avant fermeture affichant le badge 'Ferme bientôt' (minutes).",
     )
     max_quantity_per_order = models.PositiveSmallIntegerField(
         default=3,
@@ -84,6 +88,10 @@ class PlatformSetting(models.Model):
                     order_cutoff_before_close_minutes__gte=F("order_response_timeout_minutes")
                 ),
                 name="core_platformsetting_cutoff_gte_response_timeout",
+            ),
+            models.CheckConstraint(
+                condition=Q(closing_soon_threshold_minutes__gt=0),
+                name="core_platformsetting_closing_soon_gt_0",
             ),
             models.CheckConstraint(
                 condition=Q(max_quantity_per_order__gt=0),
