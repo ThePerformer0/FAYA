@@ -1,13 +1,14 @@
 /**
  * Fiche détaillée d'un dépôt — Esthétique éditoriale architecturale (« Braise sur Sable »).
- * Zéro boîte encadrée 1px grise : bandeau supérieur charbon, liste d'infos à même le sable,
- * bloc tarifaire continu avec accent de 4 px et barre basse charbon.
+ * Le bouton « Itinéraire » ouvre la carte intégrée (chargée à la demande) avec la position du dépôt
+ * + demande/affiche la position du client si autorisée, et propose le guidage Google Maps en option.
  */
 
 import {
   IconArrowLeft,
   IconChevronRight,
-  IconMapPin,
+  IconCurrentLocation,
+  IconExternalLink,
   IconPhone,
   IconRoute,
 } from "@tabler/icons-react";
@@ -50,13 +51,44 @@ export function DepotDetailPage() {
   const { data: settings } = usePublicSettings();
   const { data: depot, isLoading, error, refetch } = useDepotDetail(depotId);
 
-  const [showMiniMap, setShowMiniMap] = useState(false);
+  const [showDirectionsMap, setShowDirectionsMap] = useState(false);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoStatus, setGeoStatus] = useState<"idle" | "locating" | "granted" | "denied" | "unsupported">("idle");
   const [selectedOffer, setSelectedOffer] = useState<PublicDepotOffer | null>(null);
 
   const mapPoints = useMemo(
     () => (depot ? [depot] : []),
     [depot],
   );
+
+  const requestUserLocation = () => {
+    if (!("geolocation" in navigator)) {
+      setGeoStatus("unsupported");
+      return;
+    }
+    setGeoStatus("locating");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserCoords({
+          lat: Number(position.coords.latitude.toFixed(6)),
+          lng: Number(position.coords.longitude.toFixed(6)),
+        });
+        setGeoStatus("granted");
+      },
+      () => {
+        setGeoStatus("denied");
+      },
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
+    );
+  };
+
+  const handleToggleDirections = () => {
+    const nextOpen = !showDirectionsMap;
+    setShowDirectionsMap(nextOpen);
+    if (nextOpen && !userCoords && geoStatus === "idle") {
+      requestUserLocation();
+    }
+  };
 
   if (isLoading) {
     return (
@@ -103,7 +135,9 @@ export function DepotDetailPage() {
   const lastOrderHHMM = formatTimeHHMM(depot.last_order_time);
   const reopensHHMM = formatTimeHHMM(depot.reopens_at);
 
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${depot.latitude},${depot.longitude}`;
+  const googleMapsUrl = userCoords
+    ? `https://www.google.com/maps/dir/?api=1&origin=${userCoords.lat},${userCoords.lng}&destination=${depot.latitude},${depot.longitude}`
+    : `https://www.google.com/maps/dir/?api=1&destination=${depot.latitude},${depot.longitude}`;
   const freshnessSource = depot.offers[0]?.updated_at ?? depot.updated_at;
 
   const canChoose = isOnline && depot.can_order && depot.offers.length > 0;
@@ -131,18 +165,9 @@ export function DepotDetailPage() {
               <IconArrowLeft size={20} stroke={1.75} aria-hidden="true" />
               <span>{t("nav.back")}</span>
             </Link>
-
-            <button
-              type="button"
-              onClick={() => setShowMiniMap((v) => !v)}
-              className="touch-target inline-flex h-10 items-center gap-1.5 rounded-sm bg-header-surface px-3.5 text-sm font-bold text-text-inverse hover:bg-ink-700"
-            >
-              <IconMapPin size={18} stroke={1.75} aria-hidden="true" />
-              <span>{showMiniMap ? t("store.hideMap") : t("store.showMap")}</span>
-            </button>
           </div>
 
-          <h1 className="mt-2 font-display text-2xl font-bold uppercase tracking-[0.5px] text-text-inverse">
+          <h1 className="mt-1 font-display text-2xl font-bold uppercase tracking-[0.5px] text-text-inverse">
             {depot.name}
           </h1>
 
@@ -170,20 +195,9 @@ export function DepotDetailPage() {
         </div>
       </header>
 
-      {/* Contenu éditorial sur fond sable chaud (zéro boîte encadrée 1px) */}
+      {/* Contenu éditorial sur fond sable chaud */}
       <div className="mx-auto w-full max-w-xl space-y-5 px-4 pt-4">
-        {/* Miniature carte chargée à la demande */}
-        {showMiniMap && (
-          <div className="h-56 overflow-hidden bg-surface-muted">
-            <Suspense
-              fallback={<div className="h-full w-full bg-surface-muted animate-skeleton" />}
-            >
-              <LazyDepotsMap depots={mapPoints} selectedDepotId={depot.id} />
-            </Suspense>
-          </div>
-        )}
-
-        {/* Boutons rapides Appeler / Itinéraire (surfaces pleines nettes) */}
+        {/* Boutons rapides Appeler / Itinéraire */}
         <div className="grid grid-cols-2 gap-2.5">
           <a
             href={`tel:${depot.phone}`}
@@ -193,18 +207,82 @@ export function DepotDetailPage() {
             <span>{t("store.call")}</span>
           </a>
 
-          <a
-            href={directionsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="touch-target inline-flex items-center justify-center gap-2 rounded-sm bg-card px-4 py-3 text-base font-bold text-text hover:bg-price-band"
+          <button
+            type="button"
+            onClick={handleToggleDirections}
+            aria-expanded={showDirectionsMap}
+            className={`touch-target inline-flex items-center justify-center gap-2 rounded-sm px-4 py-3 text-base font-bold transition-colors duration-150 ${
+              showDirectionsMap
+                ? "bg-ink-900 text-text-inverse"
+                : "bg-card text-text hover:bg-price-band"
+            }`}
           >
-            <IconRoute size={20} stroke={1.75} className="text-text-brand" aria-hidden="true" />
-            <span>{t("store.directions")}</span>
-          </a>
+            <IconRoute
+              size={20}
+              stroke={1.75}
+              className={showDirectionsMap ? "text-action" : "text-text-brand"}
+              aria-hidden="true"
+            />
+            <span>{showDirectionsMap ? t("store.closeDirections") : t("store.directions")}</span>
+          </button>
         </div>
 
-        {/* Informations pratiques posées directement à même le sable (filets horizontaux purs) */}
+        {/* Panneau Itinéraire intégré (dépôt + position client si autorisée, chargé à la demande) */}
+        {showDirectionsMap && (
+          <div className="relative z-0 isolate space-y-2.5 border-l-4 border-action bg-card">
+            <div className="relative z-0 isolate h-64 w-full overflow-hidden bg-surface-muted">
+              <Suspense
+                fallback={<div className="h-full w-full bg-surface-muted animate-skeleton" />}
+              >
+                <LazyDepotsMap
+                  depots={mapPoints}
+                  selectedDepotId={depot.id}
+                  userCoords={userCoords}
+                />
+              </Suspense>
+            </div>
+
+            <div className="space-y-2.5 px-4 pb-4">
+              {geoStatus === "locating" && (
+                <p className="text-xs font-medium text-text-secondary">{t("geo.locating")}</p>
+              )}
+
+              {geoStatus === "granted" && userCoords && (
+                <p className="text-xs font-medium text-open">{t("store.yourPositionShown")}</p>
+              )}
+
+              {(geoStatus === "denied" || geoStatus === "idle") && !userCoords && (
+                <div className="flex flex-wrap items-center justify-between gap-2 bg-price-band px-3 py-2 text-xs text-text-secondary">
+                  <span>{t("store.shareLocationPrompt")}</span>
+                  <button
+                    type="button"
+                    onClick={requestUserLocation}
+                    className="inline-flex min-h-9 items-center gap-1.5 rounded-sm bg-ink-900 px-3 text-xs font-bold text-text-inverse hover:bg-ink-700"
+                  >
+                    <IconCurrentLocation size={14} stroke={2} aria-hidden="true" />
+                    <span>{t("store.showMyPosition")}</span>
+                  </button>
+                </div>
+              )}
+
+              {geoStatus === "unsupported" && (
+                <p className="text-xs text-text-secondary">{t("geo.unsupported")}</p>
+              )}
+
+              <a
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-sm bg-surface-muted px-3 text-sm font-bold text-text hover:bg-border"
+              >
+                <IconExternalLink size={17} stroke={1.75} aria-hidden="true" />
+                <span>{t("store.openInGoogleMaps")}</span>
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Informations pratiques posées directement à même le sable */}
         <dl className="divide-y divide-border text-base">
           <div className="flex items-baseline justify-between gap-4 py-3">
             <dt className="shrink-0 text-xs font-bold uppercase tracking-[0.5px] text-text-secondary">

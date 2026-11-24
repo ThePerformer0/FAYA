@@ -1,16 +1,14 @@
 /**
- * Écran Dépôts — Fusion « Braise sur Sable » (A + B).
- * Bloc supérieur charbon (recherche + filtres pilules) + liste sur fond sable chaud + carte Leaflet paresseuse.
+ * Écran Dépôts — Liste rapide et légère (sans chargement OpenStreetMap à l'accueil).
+ * Bloc supérieur charbon (recherche + géolocalisation + filtres) + liste éditoriale sur fond sable.
  */
 
 import {
   IconCurrentLocation,
-  IconList,
-  IconMapPin,
   IconSearch,
   IconX,
 } from "@tabler/icons-react";
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { formatCapacityKg } from "../../design/formatters";
@@ -28,31 +26,11 @@ import {
   type OperationType,
 } from "./useDepots";
 
-const LazyDepotsMap = lazy(() => import("./DepotsMap"));
-
 const COMMON_CAPACITIES = ["6.00", "12.50", "35.00"] as const;
 const OPERATIONS: OperationType[] = ["REFILL", "EXCHANGE", "FIRST_ACQUISITION"];
 
-function useIsDesktop(): boolean {
-  const [isDesktop, setIsDesktop] = useState<boolean>(() =>
-    typeof window !== "undefined" ? window.matchMedia("(min-width: 64rem)").matches : false,
-  );
-
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 64rem)");
-    const onChange = (event: MediaQueryListEvent) => setIsDesktop(event.matches);
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
-  }, []);
-
-  return isDesktop;
-}
-
 export function DepotsPage() {
   const { t, i18n } = useTranslation();
-  const isDesktop = useIsDesktop();
-
-  const [mobileView, setMobileView] = useState<"list" | "map">("list");
 
   const [searchInput, setSearchInput] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -62,9 +40,9 @@ export function DepotsPage() {
   const [openNow, setOpenNow] = useState(false);
 
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [geoStatus, setGeoStatus] = useState<"idle" | "prompt" | "locating" | "denied" | "unsupported">("idle");
-
-  const [selectedDepotId, setSelectedDepotId] = useState<string | null>(null);
+  const [geoStatus, setGeoStatus] = useState<
+    "idle" | "prompt" | "locating" | "denied" | "unsupported"
+  >("idle");
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -101,11 +79,6 @@ export function DepotsPage() {
 
   const hasActiveFilters = Boolean(
     debouncedQuery || selectedBrandId || selectedCapacity || selectedOperation || openNow,
-  );
-
-  const selectedDepot = useMemo(
-    () => depots.find((d) => d.id === selectedDepotId) ?? null,
-    [depots, selectedDepotId],
   );
 
   const resetFilters = () => {
@@ -151,19 +124,11 @@ export function DepotsPage() {
     }
   };
 
-  const shouldRenderMap = isDesktop || mobileView === "map";
-
   return (
-    <div className="flex flex-1 flex-col lg:h-[calc(100dvh-3.5rem)] lg:flex-row lg:overflow-hidden">
-      {/* Colonne gauche (recherche charbon + liste sur fond sable chaud) */}
-      <section
-        aria-label={t("search.title")}
-        className={`flex flex-col bg-bg lg:w-[26rem] lg:shrink-0 lg:border-r lg:border-card-border lg:overflow-y-auto ${
-          !isDesktop && mobileView === "map" ? "hidden" : "flex-1"
-        }`}
-      >
-        {/* Bloc recherche + filtres dans le bandeau charbon unifié (zéro bordure grise) */}
-        <div className="sticky top-0 z-10 bg-header-bg px-4 pt-2 pb-3.5 text-text-inverse">
+    <section aria-label={t("search.title")} className="flex flex-1 flex-col bg-bg">
+      {/* Bandeau supérieur charbon : recherche + géolocalisation + filtres */}
+      <div className="sticky top-14 z-10 bg-header-bg text-text-inverse">
+        <div className="mx-auto w-full max-w-4xl px-4 pt-2 pb-3.5 lg:px-6">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <label htmlFor="depot-search-q" className="sr-only">
@@ -243,18 +208,18 @@ export function DepotsPage() {
           )}
 
           {geoStatus === "denied" && (
-            <p role="status" className="mt-2 rounded-md bg-header-surface px-3 py-2 text-xs text-text-inverse-muted">
+            <p role="status" className="mt-2 bg-header-surface px-3 py-2 text-xs text-text-inverse-muted">
               {t("geo.denied")}
             </p>
           )}
 
           {geoStatus === "unsupported" && (
-            <p role="status" className="mt-2 rounded-md bg-header-surface px-3 py-2 text-xs text-text-inverse-muted">
+            <p role="status" className="mt-2 bg-header-surface px-3 py-2 text-xs text-text-inverse-muted">
               {t("geo.unsupported")}
             </p>
           )}
 
-          {/* Pastilles de filtres sombres avec accent rouge Faya */}
+          {/* Pastilles de filtres */}
           <div
             className="mt-2 flex items-center gap-2 overflow-x-auto pb-0.5"
             role="group"
@@ -304,9 +269,11 @@ export function DepotsPage() {
             ))}
           </div>
         </div>
+      </div>
 
-        {/* Barre compteur + réinitialisation sur fond sable */}
-        <div className="flex items-center justify-between px-4 pt-3 pb-1 text-xs text-text-secondary">
+      {/* Corps sur fond sable chaud */}
+      <div className="mx-auto w-full max-w-4xl flex-1 px-4 pt-3 pb-8 lg:px-6">
+        <div className="flex items-center justify-between pb-2.5 text-xs text-text-secondary">
           <span className="font-medium">
             {isLoading ? "…" : t("search.resultsCount", { count: totalCount })}
             {isFetching && !isLoading ? " · …" : ""}
@@ -322,106 +289,40 @@ export function DepotsPage() {
           )}
         </div>
 
-        {/* Liste des dépôts */}
-        <div className="flex-1 space-y-3 px-4 pt-2 pb-24 lg:pb-6">
-          {error ? (
-            <ErrorBanner
-              title={t("errors.serverTitle")}
-              message={error instanceof Error ? error.message : t("errors.serverBody")}
-              onRetry={() => void refetch()}
-            />
-          ) : isLoading ? (
-            <>
-              <DepotCardSkeleton />
-              <DepotCardSkeleton />
-              <DepotCardSkeleton />
-            </>
-          ) : depots.length === 0 ? (
-            <EmptyState
-              title={t("search.emptyTitle")}
-              body={t("search.emptyBody")}
-              actionLabel={hasActiveFilters ? t("search.resetFilters") : undefined}
-              onAction={hasActiveFilters ? resetFilters : undefined}
-            />
-          ) : (
-            depots.map((depot) => (
+        {error ? (
+          <ErrorBanner
+            title={t("errors.serverTitle")}
+            message={error instanceof Error ? error.message : t("errors.serverBody")}
+            onRetry={() => void refetch()}
+          />
+        ) : isLoading ? (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <DepotCardSkeleton />
+            <DepotCardSkeleton />
+            <DepotCardSkeleton />
+            <DepotCardSkeleton />
+          </div>
+        ) : depots.length === 0 ? (
+          <EmptyState
+            title={t("search.emptyTitle")}
+            body={t("search.emptyBody")}
+            actionLabel={hasActiveFilters ? t("search.resetFilters") : undefined}
+            onAction={hasActiveFilters ? resetFilters : undefined}
+          />
+        ) : (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            {depots.map((depot) => (
               <DepotCard
                 key={depot.id}
                 depot={depot}
                 serverNow={settings?.server_now}
-                selected={isDesktop && selectedDepotId === depot.id}
                 activeBrandId={selectedBrandId}
                 activeCapacityKg={selectedCapacity}
-                onHighlight={isDesktop ? setSelectedDepotId : undefined}
               />
-            ))
-          )}
-        </div>
-      </section>
-
-      {/* Carte Leaflet */}
-      {shouldRenderMap && (
-        <section
-          aria-label={t("search.viewMap")}
-          className={`relative flex-1 ${
-            isDesktop ? "h-full" : "h-[calc(100dvh-7.5rem)] w-full"
-          }`}
-        >
-          <Suspense
-            fallback={
-              <div className="flex h-full w-full items-center justify-center bg-surface-muted p-6">
-                <div className="h-10 w-40 rounded-md bg-ink-200 animate-skeleton" />
-              </div>
-            }
-          >
-            <LazyDepotsMap
-              depots={depots}
-              selectedDepotId={selectedDepotId}
-              onSelectDepot={setSelectedDepotId}
-              userCoords={userCoords}
-            />
-          </Suspense>
-
-          {!isDesktop && selectedDepot && (
-            <div className="absolute right-3 bottom-20 left-3 z-[400] shadow-sheet">
-              <DepotCard
-                depot={selectedDepot}
-                serverNow={settings?.server_now}
-                selected
-                activeBrandId={selectedBrandId}
-                activeCapacityKg={selectedCapacity}
-                compact
-              />
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* Bouton flottant mobile Carte / Liste */}
-      {!isDesktop && (
-        <div className="pointer-events-none fixed right-0 bottom-[calc(4.25rem+var(--safe-bottom))] left-0 z-[450] flex justify-center">
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedDepotId(null);
-              setMobileView((v) => (v === "list" ? "map" : "list"));
-            }}
-            className="pointer-events-auto inline-flex h-12 items-center gap-2 rounded-full bg-header-bg px-5 font-sans text-base font-bold text-text-inverse shadow-popover"
-          >
-            {mobileView === "list" ? (
-              <>
-                <IconMapPin size={20} stroke={1.75} aria-hidden="true" />
-                <span>{t("search.viewMap")}</span>
-              </>
-            ) : (
-              <>
-                <IconList size={20} stroke={1.75} aria-hidden="true" />
-                <span>{t("search.viewList")}</span>
-              </>
-            )}
-          </button>
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }

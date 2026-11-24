@@ -75,6 +75,7 @@ export default function DepotsMap({
         center: initialCenter,
         zoom: 13,
         zoomControl: true,
+        scrollWheelZoom: false,
       });
 
       leaflet
@@ -178,7 +179,7 @@ export default function DepotsMap({
     }
   }, [mapReady, depots, selectedDepotId, onSelectDepot, i18n.language, userCoords]);
 
-  // Repère position du client
+  // Repère position du client + ligne de repère vers le dépôt
   useEffect(() => {
     const leaflet = leafletRef.current;
     const layer = userLayerRef.current;
@@ -188,15 +189,30 @@ export default function DepotsMap({
     layer.clearLayers();
     if (!userCoords) return;
 
+    const userLatLng: [number, number] = [userCoords.lat, userCoords.lng];
     const userIcon = leaflet.divIcon({
       className: "faya-map-marker-wrapper",
       html: '<div class="faya-user-dot"></div>',
       iconSize: [18, 18],
       iconAnchor: [9, 9],
     });
-    leaflet.marker([userCoords.lat, userCoords.lng], { icon: userIcon, interactive: false }).addTo(layer);
-    map.panTo([userCoords.lat, userCoords.lng]);
-  }, [mapReady, userCoords]);
+    leaflet.marker(userLatLng, { icon: userIcon, interactive: false }).addTo(layer);
+
+    if (depots.length === 1) {
+      const depotLatLng: [number, number] = [depots[0].latitude, depots[0].longitude];
+      leaflet
+        .polyline([userLatLng, depotLatLng], {
+          color: "#F42902",
+          weight: 3,
+          dashArray: "6 6",
+          opacity: 0.85,
+        })
+        .addTo(layer);
+      map.fitBounds([userLatLng, depotLatLng], { padding: [44, 44], maxZoom: 16 });
+    } else {
+      map.panTo(userLatLng);
+    }
+  }, [mapReady, userCoords, depots]);
 
   return (
     <div
