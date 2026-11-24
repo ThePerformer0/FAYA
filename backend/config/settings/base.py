@@ -36,7 +36,7 @@ CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS", default=[])
 USE_POSTGIS = env("USE_POSTGIS")
 
 # Sous Windows natif, résolution automatique des DLL GDAL/GEOS fournies par PostgreSQL/PostGIS
-if USE_POSTGIS and os.name == "nt":
+if os.name == "nt":
     GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH", default="")
     GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH", default="")
 
