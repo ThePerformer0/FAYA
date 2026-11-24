@@ -102,7 +102,17 @@ def test_offer_nested_serialization_has_expected_fields(api_client):
     response = api_client.get(URL_DEPOTS)
     item = next(row for row in response.json()["results"] if row["id"] == str(depot.pk))
     serialized_offer = next(row for row in item["offers"] if row["id"] == str(offer.pk))
-    assert set(serialized_offer) == {"id", "product", "notes", "operations", "exchange_brands", "updated_at"}
+    assert set(serialized_offer) == {
+        "id",
+        "product",
+        "notes",
+        "operations",
+        "exchange_brands",
+        "available_full_quantity",
+        "available_new_quantity",
+        "stock_updated_at",
+        "updated_at",
+    }
     assert len(serialized_offer["operations"]) == 1
     op = serialized_offer["operations"][0]
     assert set(op) == {"operation_type", "gas_price", "bottle_price", "deposit_amount", "total_unit_price"}

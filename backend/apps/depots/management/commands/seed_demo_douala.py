@@ -20,6 +20,8 @@ from apps.depots.models import (
     OfferOperation,
     OperationType,
 )
+from apps.inventory.models import DepotStock, StockCategory
+from apps.inventory.services import restock_depot_stock
 
 
 class Command(BaseCommand):
@@ -284,6 +286,35 @@ class Command(BaseCommand):
                         offer=offer,
                         accepted_brand=brands[ex_name],
                     )
+
+                if spec["status"] == DepotStatus.ACTIVE and not DepotStock.objects.filter(
+                    depot=depot, product=products[product_key]
+                ).exists():
+                    restock_depot_stock(
+                        depot=depot,
+                        product=products[product_key],
+                        category=StockCategory.FULL,
+                        quantity=14,
+                        actor=manager,
+                        reason="Stock initial de démonstration",
+                    )
+                    restock_depot_stock(
+                        depot=depot,
+                        product=products[product_key],
+                        category=StockCategory.EMPTY,
+                        quantity=6,
+                        actor=manager,
+                        reason="Stock initial vides",
+                    )
+                    if any(op[0] == OperationType.FIRST_ACQUISITION for op in ops):
+                        restock_depot_stock(
+                            depot=depot,
+                            product=products[product_key],
+                            category=StockCategory.NEW,
+                            quantity=4,
+                            actor=manager,
+                            reason="Stock initial bouteilles neuves",
+                        )
 
         self.stdout.write(
             self.style.SUCCESS(

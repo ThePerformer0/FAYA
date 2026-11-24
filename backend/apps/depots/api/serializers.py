@@ -8,6 +8,7 @@ from rest_framework import serializers
 from apps.catalog.api.serializers import BrandSerializer, ProductSerializer
 from apps.depots.models import Depot, DepotProductOffer, OfferOperation, OperationType
 from apps.depots.selectors import DepotOpenState, compute_depot_open_state
+from apps.inventory.models import StockCategory
 
 
 class DepotSearchQuerySerializer(serializers.Serializer):
@@ -58,6 +59,9 @@ class PublicDepotOfferSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     operations = serializers.SerializerMethodField()
     exchange_brands = serializers.SerializerMethodField()
+    available_full_quantity = serializers.SerializerMethodField()
+    available_new_quantity = serializers.SerializerMethodField()
+    stock_updated_at = serializers.SerializerMethodField()
 
     class Meta:
         model = DepotProductOffer
@@ -67,9 +71,28 @@ class PublicDepotOfferSerializer(serializers.ModelSerializer):
             "notes",
             "operations",
             "exchange_brands",
+            "available_full_quantity",
+            "available_new_quantity",
+            "stock_updated_at",
             "updated_at",
         )
         read_only_fields = fields
+
+    def _stock_summary(self, obj: DepotProductOffer) -> tuple[int, int, str | None]:
+        stock_map: dict = self.context.get("sellable_stock_map") or {}
+        entry = stock_map.get(obj.product_id)
+        if not entry:
+            return 0, 0, None
+        return entry["full"], entry["new"], entry["updated_at"]
+
+    def get_available_full_quantity(self, obj: DepotProductOffer) -> int:
+        return self._stock_summary(obj)[0]
+
+    def get_available_new_quantity(self, obj: DepotProductOffer) -> int:
+        return self._stock_summary(obj)[1]
+
+    def get_stock_updated_at(self, obj: DepotProductOffer) -> str | None:
+        return self._stock_summary(obj)[2]
 
     @extend_schema_field(PublicOfferOperationSerializer(many=True))
     def get_operations(self, obj: DepotProductOffer) -> list[dict]:
@@ -156,7 +179,26 @@ class PublicDepotListSerializer(OpenStatusFieldMixin, serializers.ModelSerialize
     @extend_schema_field(PublicDepotOfferSerializer(many=True))
     def get_offers(self, obj: Depot) -> list[dict]:
         offers = getattr(obj, "public_offers", [])
-        return PublicDepotOfferSerializer(offers, many=True).data
+        stocks = getattr(obj, "sellable_stocks", [])
+        stock_map: dict = {}
+        for stock in stocks:
+            entry = stock_map.setdefault(
+                stock.product_id,
+                {"full": 0, "new": 0, "updated_at_dt": None, "updated_at": None},
+            )
+            if stock.category == StockCategory.FULL:
+                entry["full"] = stock.available_quantity
+            elif stock.category == StockCategory.NEW:
+                entry["new"] = stock.available_quantity
+            if entry["updated_at_dt"] is None or stock.updated_at > entry["updated_at_dt"]:
+                entry["updated_at_dt"] = stock.updated_at
+                entry["updated_at"] = stock.updated_at.isoformat()
+
+        return PublicDepotOfferSerializer(
+            offers,
+            many=True,
+            context={**self.context, "sellable_stock_map": stock_map},
+        ).data
 
 
 class PublicDepotDetailSerializer(PublicDepotListSerializer):

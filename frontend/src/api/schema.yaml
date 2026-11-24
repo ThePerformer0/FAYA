@@ -266,6 +266,736 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: ''
+  /api/v1/depot/:
+    get:
+      operationId: depot_retrieve
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Consulter les informations et horaires de son dépôt
+      tags:
+      - Depot Portal
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedDepot'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+    patch:
+      operationId: depot_partial_update
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Mettre à jour les informations et horaires de son dépôt
+      tags:
+      - Depot Portal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedManagedDepotUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedManagedDepotUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedManagedDepotUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedDepot'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/offers/:
+    get:
+      operationId: depot_offers_list
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Lister toutes les offres commerciales de son dépôt
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - Depot Portal
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedManagedOfferList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+    post:
+      operationId: depot_offers_create
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Créer une offre produit pour son dépôt
+      tags:
+      - Depot Portal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagedOfferCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ManagedOfferCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ManagedOfferCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedOffer'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/offers/{offer_id}/:
+    get:
+      operationId: depot_offers_retrieve
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Consulter une offre de son dépôt
+      parameters:
+      - in: path
+        name: offer_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Depot Portal
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedOffer'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+    patch:
+      operationId: depot_offers_partial_update
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Modifier une offre, ses prix/opérations et ses marques d'échange
+      parameters:
+      - in: path
+        name: offer_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Depot Portal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedManagedOfferUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedManagedOfferUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedManagedOfferUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedOffer'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+    delete:
+      operationId: depot_offers_destroy
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Supprimer une offre de son dépôt
+      parameters:
+      - in: path
+        name: offer_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Depot Portal
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/proposals/:
+    get:
+      operationId: depot_proposals_list
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Lister les propositions de produits soumises par son dépôt
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - Depot Portal
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedManagedProductProposalList'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+    post:
+      operationId: depot_proposals_create
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Proposer un nouveau produit au catalogue central
+      tags:
+      - Depot Portal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManagedProductProposalCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ManagedProductProposalCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ManagedProductProposalCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagedProductProposal'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/stock-movements/:
+    get:
+      operationId: depot_stock_movements_list
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Consulter l'historique paginé des mouvements de stock du dépôt
+      parameters:
+      - in: query
+        name: category
+        schema:
+          enum:
+          - FULL
+          - EMPTY
+          - NEW
+          - DEPOSIT
+          type: string
+          minLength: 1
+        description: |-
+          * `FULL` - Pleine
+          * `EMPTY` - Vide
+          * `NEW` - Neuve
+          * `DEPOSIT` - Sous consigne
+      - in: query
+        name: movement_type
+        schema:
+          enum:
+          - RESTOCK
+          - MANUAL_ADJUSTMENT
+          - INVENTORY_CORRECTION
+          - SCRAP
+          - RESERVATION
+          - RELEASE
+          - PICKUP_OUT
+          - EMPTY_RETURN
+          type: string
+          minLength: 1
+        description: |-
+          * `RESTOCK` - Approvisionnement
+          * `MANUAL_ADJUSTMENT` - Ajustement manuel
+          * `INVENTORY_CORRECTION` - Correction d'inventaire
+          * `SCRAP` - Mise au rebut
+          * `RESERVATION` - Réservation
+          * `RELEASE` - Libération
+          * `PICKUP_OUT` - Remise client
+          * `EMPTY_RETURN` - Retour bouteille vide
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: product
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - Depot Inventory
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStockMovementList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/stocks/:
+    get:
+      operationId: depot_stocks_list
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Consulter les stocks du dépôt par produit et catégorie
+      parameters:
+      - in: query
+        name: category
+        schema:
+          enum:
+          - FULL
+          - EMPTY
+          - NEW
+          - DEPOSIT
+          type: string
+          minLength: 1
+        description: |-
+          * `FULL` - Pleine
+          * `EMPTY` - Vide
+          * `NEW` - Neuve
+          * `DEPOSIT` - Sous consigne
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: product
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - Depot Inventory
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDepotStockList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/stocks/adjust/:
+    post:
+      operationId: depot_stocks_adjust_create
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Corriger manuellement un stock (inventaire / ajustement avec motif
+        obligatoire)
+      tags:
+      - Depot Inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockAdjustRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StockAdjustRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StockAdjustRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockMutationResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/stocks/restock/:
+    post:
+      operationId: depot_stocks_restock_create
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Approvisionner le stock physique d'un produit
+      tags:
+      - Depot Inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockRestockRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StockRestockRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StockRestockRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockMutationResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/stocks/scrap/:
+    post:
+      operationId: depot_stocks_scrap_create
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Déclarer une mise au rebut / casse avec motif obligatoire
+      tags:
+      - Depot Inventory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockScrapRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StockScrapRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StockScrapRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockMutationResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
   /api/v1/depots/:
     get:
       operationId: depots_list
@@ -488,6 +1218,56 @@ components:
       - id
       - logo_url
       - name
+    CategoryEnum:
+      enum:
+      - FULL
+      - EMPTY
+      - NEW
+      - DEPOSIT
+      type: string
+      description: |-
+        * `FULL` - Pleine
+        * `EMPTY` - Vide
+        * `NEW` - Neuve
+        * `DEPOSIT` - Sous consigne
+    DepotStock:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product:
+          allOf:
+          - $ref: '#/components/schemas/Product'
+          readOnly: true
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategoryEnum'
+          readOnly: true
+        physical_quantity:
+          type: integer
+          readOnly: true
+          description: Quantité physique réellement présente au dépôt.
+        reserved_quantity:
+          type: integer
+          readOnly: true
+          description: Quantité réservée par des commandes actives (gérée par le système).
+        available_quantity:
+          type: integer
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - available_quantity
+      - category
+      - id
+      - physical_quantity
+      - product
+      - reserved_quantity
+      - updated_at
     HealthCheck:
       type: object
       properties:
@@ -512,6 +1292,328 @@ components:
       required:
       - email
       - password
+    ManagedDepot:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        address:
+          type: string
+          readOnly: true
+        neighborhood:
+          type: string
+          readOnly: true
+          description: Quartier ou zone de référence pour la recherche textuelle.
+        phone:
+          type: string
+          readOnly: true
+          description: Numéro de contact affiché sur la fiche publique (format E.164).
+        latitude:
+          type: number
+          format: double
+          readOnly: true
+        longitude:
+          type: number
+          format: double
+          readOnly: true
+        opening_time:
+          type: string
+          format: time
+          readOnly: true
+        closing_time:
+          type: string
+          format: time
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ManagedDepotStatusEnum'
+          readOnly: true
+        is_editable:
+          type: boolean
+          readOnly: true
+        open_status:
+          type: string
+          readOnly: true
+        can_order:
+          type: boolean
+          readOnly: true
+        last_order_time:
+          type: string
+          readOnly: true
+        reopens_at:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - can_order
+      - closing_time
+      - created_at
+      - description
+      - id
+      - is_editable
+      - last_order_time
+      - latitude
+      - longitude
+      - name
+      - neighborhood
+      - open_status
+      - opening_time
+      - phone
+      - reopens_at
+      - status
+      - updated_at
+    ManagedDepotStatusEnum:
+      enum:
+      - PENDING
+      - ACTIVE
+      - SUSPENDED
+      - DISABLED
+      type: string
+      description: |-
+        * `PENDING` - En attente de validation
+        * `ACTIVE` - Actif
+        * `SUSPENDED` - Suspendu
+        * `DISABLED` - Désactivé
+    ManagedOffer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product:
+          allOf:
+          - $ref: '#/components/schemas/Product'
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedOfferOperation'
+          readOnly: true
+        exchange_brands:
+          type: array
+          items:
+            $ref: '#/components/schemas/Brand'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - exchange_brands
+      - id
+      - is_active
+      - notes
+      - operations
+      - product
+      - updated_at
+    ManagedOfferCreateRequest:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+        is_active:
+          type: boolean
+          default: true
+        notes:
+          type: string
+          default: ''
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedOfferOperationInputRequest'
+        exchange_brand_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - product_id
+    ManagedOfferOperation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        operation_type:
+          allOf:
+          - $ref: '#/components/schemas/OperationTypeEnum'
+          readOnly: true
+        is_active:
+          type: boolean
+          readOnly: true
+        gas_price:
+          type: integer
+          readOnly: true
+          description: Prix de l'opération ou du gaz (en FCFA).
+        bottle_price:
+          type: integer
+          readOnly: true
+          description: Prix de la bouteille (Première bouteille uniquement, en FCFA).
+        deposit_amount:
+          type: integer
+          readOnly: true
+          description: Montant de la consigne (Première bouteille uniquement, en FCFA).
+        total_unit_price:
+          type: integer
+          readOnly: true
+      required:
+      - bottle_price
+      - deposit_amount
+      - gas_price
+      - id
+      - is_active
+      - operation_type
+      - total_unit_price
+    ManagedOfferOperationInputRequest:
+      type: object
+      properties:
+        operation_type:
+          $ref: '#/components/schemas/OperationTypeEnum'
+        is_active:
+          type: boolean
+          default: true
+        gas_price:
+          type: integer
+          minimum: 0
+        bottle_price:
+          type: integer
+          minimum: 0
+          default: 0
+        deposit_amount:
+          type: integer
+          minimum: 0
+          default: 0
+      required:
+      - gas_price
+      - operation_type
+    ManagedProductProposal:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        proposed_brand_name:
+          type: string
+          readOnly: true
+        capacity_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+        product_type:
+          allOf:
+          - $ref: '#/components/schemas/ProductTypeEnum'
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ManagedProductProposalStatusEnum'
+          readOnly: true
+        review_note:
+          type: string
+          readOnly: true
+        reviewed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_product:
+          allOf:
+          - $ref: '#/components/schemas/Product'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - capacity_kg
+      - created_at
+      - created_product
+      - description
+      - id
+      - name
+      - product_type
+      - proposed_brand_name
+      - review_note
+      - reviewed_at
+      - status
+      - updated_at
+    ManagedProductProposalCreateRequest:
+      type: object
+      properties:
+        proposed_brand_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        capacity_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+        product_type:
+          allOf:
+          - $ref: '#/components/schemas/ProductTypeEnum'
+          default: BUTANE
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        description:
+          type: string
+          default: ''
+      required:
+      - capacity_kg
+      - name
+      - proposed_brand_name
+    ManagedProductProposalStatusEnum:
+      enum:
+      - PENDING
+      - APPROVED
+      - REJECTED
+      type: string
+      description: |-
+        * `PENDING` - En attente
+        * `APPROVED` - Approuvée
+        * `REJECTED` - Refusée
     OperationTypeEnum:
       enum:
       - REFILL
@@ -522,6 +1624,75 @@ components:
         * `REFILL` - Recharge
         * `EXCHANGE` - Échange
         * `FIRST_ACQUISITION` - Première bouteille
+    PaginatedDepotStockList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DepotStock'
+    PaginatedManagedOfferList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedOffer'
+    PaginatedManagedProductProposalList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedProductProposal'
     PaginatedProductList:
       type: object
       required:
@@ -568,6 +1739,81 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PublicDepotList'
+    PaginatedStockMovementList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StockMovement'
+    PatchedManagedDepotUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        description:
+          type: string
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        neighborhood:
+          type: string
+          maxLength: 120
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+        latitude:
+          type: number
+          format: double
+          maximum: 90.0
+          minimum: -90.0
+        longitude:
+          type: number
+          format: double
+          maximum: 180.0
+          minimum: -180.0
+        opening_time:
+          type: string
+          format: time
+        closing_time:
+          type: string
+          format: time
+    PatchedManagedOfferUpdateRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+        notes:
+          type: string
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManagedOfferOperationInputRequest'
+        exchange_brand_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
     PatchedUpdateProfileRequest:
       type: object
       properties:
@@ -814,16 +2060,29 @@ components:
           items:
             $ref: '#/components/schemas/Brand'
           readOnly: true
+        available_full_quantity:
+          type: integer
+          readOnly: true
+        available_new_quantity:
+          type: integer
+          readOnly: true
+        stock_updated_at:
+          type: string
+          nullable: true
+          readOnly: true
         updated_at:
           type: string
           format: date-time
           readOnly: true
       required:
+      - available_full_quantity
+      - available_new_quantity
       - exchange_brands
       - id
       - notes
       - operations
       - product
+      - stock_updated_at
       - updated_at
     PublicOfferOperation:
       type: object
@@ -934,6 +2193,164 @@ components:
         * `CUSTOMER` - Client
         * `DEPOT_MANAGER` - Responsable de dépôt
         * `ADMIN` - Administrateur
+    StockAdjustRequestMovementTypeEnum:
+      enum:
+      - INVENTORY_CORRECTION
+      - MANUAL_ADJUSTMENT
+      type: string
+      description: |-
+        * `INVENTORY_CORRECTION` - Correction d'inventaire
+        * `MANUAL_ADJUSTMENT` - Ajustement manuel
+    StockAdjustRequestRequest:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        new_physical_quantity:
+          type: integer
+          minimum: 0
+        movement_type:
+          allOf:
+          - $ref: '#/components/schemas/StockAdjustRequestMovementTypeEnum'
+          default: INVENTORY_CORRECTION
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+        expected_physical_quantity:
+          type: integer
+          minimum: 0
+      required:
+      - category
+      - new_physical_quantity
+      - product_id
+      - reason
+    StockMovement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product:
+          allOf:
+          - $ref: '#/components/schemas/Product'
+          readOnly: true
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategoryEnum'
+          readOnly: true
+        movement_type:
+          allOf:
+          - $ref: '#/components/schemas/StockMovementMovementTypeEnum'
+          readOnly: true
+        quantity_before:
+          type: integer
+          readOnly: true
+        quantity_after:
+          type: integer
+          readOnly: true
+        delta:
+          type: integer
+          readOnly: true
+        reason:
+          type: string
+          readOnly: true
+        actor_name:
+          type: string
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - actor_name
+      - category
+      - created_at
+      - delta
+      - id
+      - movement_type
+      - product
+      - quantity_after
+      - quantity_before
+      - reason
+    StockMovementMovementTypeEnum:
+      enum:
+      - RESTOCK
+      - MANUAL_ADJUSTMENT
+      - INVENTORY_CORRECTION
+      - SCRAP
+      - RESERVATION
+      - RELEASE
+      - PICKUP_OUT
+      - EMPTY_RETURN
+      type: string
+      description: |-
+        * `RESTOCK` - Approvisionnement
+        * `MANUAL_ADJUSTMENT` - Ajustement manuel
+        * `INVENTORY_CORRECTION` - Correction d'inventaire
+        * `SCRAP` - Mise au rebut
+        * `RESERVATION` - Réservation
+        * `RELEASE` - Libération
+        * `PICKUP_OUT` - Remise client
+        * `EMPTY_RETURN` - Retour bouteille vide
+    StockMutationResponse:
+      type: object
+      properties:
+        stock:
+          allOf:
+          - $ref: '#/components/schemas/DepotStock'
+          readOnly: true
+        movement:
+          allOf:
+          - $ref: '#/components/schemas/StockMovement'
+          readOnly: true
+      required:
+      - movement
+      - stock
+    StockRestockRequestRequest:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        quantity:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+          default: ''
+          maxLength: 500
+      required:
+      - category
+      - product_id
+      - quantity
+    StockScrapRequestRequest:
+      type: object
+      properties:
+        product_id:
+          type: string
+          format: uuid
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        quantity:
+          type: integer
+          minimum: 1
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - category
+      - product_id
+      - quantity
+      - reason
     TokenRefreshResponse:
       type: object
       properties:

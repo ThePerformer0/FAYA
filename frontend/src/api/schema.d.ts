@@ -142,6 +142,206 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/depot/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consulter les informations et horaires de son dépôt
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        get: operations["depot_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Mettre à jour les informations et horaires de son dépôt
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        patch: operations["depot_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/depot/offers/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lister toutes les offres commerciales de son dépôt
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        get: operations["depot_offers_list"];
+        put?: never;
+        /**
+         * Créer une offre produit pour son dépôt
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        post: operations["depot_offers_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depot/offers/{offer_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consulter une offre de son dépôt
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        get: operations["depot_offers_retrieve"];
+        put?: never;
+        post?: never;
+        /**
+         * Supprimer une offre de son dépôt
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        delete: operations["depot_offers_destroy"];
+        options?: never;
+        head?: never;
+        /**
+         * Modifier une offre, ses prix/opérations et ses marques d'échange
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        patch: operations["depot_offers_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/depot/proposals/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lister les propositions de produits soumises par son dépôt
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        get: operations["depot_proposals_list"];
+        put?: never;
+        /**
+         * Proposer un nouveau produit au catalogue central
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        post: operations["depot_proposals_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depot/stock-movements/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consulter l'historique paginé des mouvements de stock du dépôt
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        get: operations["depot_stock_movements_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depot/stocks/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consulter les stocks du dépôt par produit et catégorie
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        get: operations["depot_stocks_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depot/stocks/adjust/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Corriger manuellement un stock (inventaire / ajustement avec motif obligatoire)
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        post: operations["depot_stocks_adjust_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depot/stocks/restock/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approvisionner le stock physique d'un produit
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        post: operations["depot_stocks_restock_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depot/stocks/scrap/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Déclarer une mise au rebut / casse avec motif obligatoire
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        post: operations["depot_stocks_scrap_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/depots/": {
         parameters: {
             query?: never;
@@ -244,6 +444,27 @@ export interface components {
             /** Format: uri */
             readonly logo_url: string;
         };
+        /**
+         * @description * `FULL` - Pleine
+         *     * `EMPTY` - Vide
+         *     * `NEW` - Neuve
+         *     * `DEPOSIT` - Sous consigne
+         * @enum {string}
+         */
+        CategoryEnum: "FULL" | "EMPTY" | "NEW" | "DEPOSIT";
+        DepotStock: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly product: components["schemas"]["Product"];
+            readonly category: components["schemas"]["CategoryEnum"];
+            /** @description Quantité physique réellement présente au dépôt. */
+            readonly physical_quantity: number;
+            /** @description Quantité réservée par des commandes actives (gérée par le système). */
+            readonly reserved_quantity: number;
+            readonly available_quantity: number;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
         HealthCheck: {
             status: string;
             database: string;
@@ -253,6 +474,125 @@ export interface components {
             email: string;
             password: string;
         };
+        ManagedDepot: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly description: string;
+            readonly address: string;
+            /** @description Quartier ou zone de référence pour la recherche textuelle. */
+            readonly neighborhood: string;
+            /** @description Numéro de contact affiché sur la fiche publique (format E.164). */
+            readonly phone: string;
+            /** Format: double */
+            readonly latitude: number;
+            /** Format: double */
+            readonly longitude: number;
+            /** Format: time */
+            readonly opening_time: string;
+            /** Format: time */
+            readonly closing_time: string;
+            readonly status: components["schemas"]["ManagedDepotStatusEnum"];
+            readonly is_editable: boolean;
+            readonly open_status: string;
+            readonly can_order: boolean;
+            readonly last_order_time: string;
+            readonly reopens_at: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `PENDING` - En attente de validation
+         *     * `ACTIVE` - Actif
+         *     * `SUSPENDED` - Suspendu
+         *     * `DISABLED` - Désactivé
+         * @enum {string}
+         */
+        ManagedDepotStatusEnum: "PENDING" | "ACTIVE" | "SUSPENDED" | "DISABLED";
+        ManagedOffer: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly product: components["schemas"]["Product"];
+            readonly is_active: boolean;
+            readonly notes: string;
+            readonly operations: components["schemas"]["ManagedOfferOperation"][];
+            readonly exchange_brands: components["schemas"]["Brand"][];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        ManagedOfferCreateRequest: {
+            /** Format: uuid */
+            product_id: string;
+            /** @default true */
+            is_active: boolean;
+            /** @default  */
+            notes: string;
+            operations?: components["schemas"]["ManagedOfferOperationInputRequest"][];
+            exchange_brand_ids?: string[];
+        };
+        ManagedOfferOperation: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly operation_type: components["schemas"]["OperationTypeEnum"];
+            readonly is_active: boolean;
+            /** @description Prix de l'opération ou du gaz (en FCFA). */
+            readonly gas_price: number;
+            /** @description Prix de la bouteille (Première bouteille uniquement, en FCFA). */
+            readonly bottle_price: number;
+            /** @description Montant de la consigne (Première bouteille uniquement, en FCFA). */
+            readonly deposit_amount: number;
+            readonly total_unit_price: number;
+        };
+        ManagedOfferOperationInputRequest: {
+            operation_type: components["schemas"]["OperationTypeEnum"];
+            /** @default true */
+            is_active: boolean;
+            gas_price: number;
+            /** @default 0 */
+            bottle_price: number;
+            /** @default 0 */
+            deposit_amount: number;
+        };
+        ManagedProductProposal: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly proposed_brand_name: string;
+            /** Format: decimal */
+            readonly capacity_kg: string;
+            readonly product_type: components["schemas"]["ProductTypeEnum"];
+            readonly name: string;
+            readonly description: string;
+            readonly status: components["schemas"]["ManagedProductProposalStatusEnum"];
+            readonly review_note: string;
+            /** Format: date-time */
+            readonly reviewed_at: string | null;
+            readonly created_product: components["schemas"]["Product"];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        ManagedProductProposalCreateRequest: {
+            proposed_brand_name: string;
+            /** Format: decimal */
+            capacity_kg: string;
+            /** @default BUTANE */
+            product_type: components["schemas"]["ProductTypeEnum"];
+            name: string;
+            /** @default  */
+            description: string;
+        };
+        /**
+         * @description * `PENDING` - En attente
+         *     * `APPROVED` - Approuvée
+         *     * `REJECTED` - Refusée
+         * @enum {string}
+         */
+        ManagedProductProposalStatusEnum: "PENDING" | "APPROVED" | "REJECTED";
         /**
          * @description * `REFILL` - Recharge
          *     * `EXCHANGE` - Échange
@@ -260,6 +600,51 @@ export interface components {
          * @enum {string}
          */
         OperationTypeEnum: "REFILL" | "EXCHANGE" | "FIRST_ACQUISITION";
+        PaginatedDepotStockList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["DepotStock"][];
+        };
+        PaginatedManagedOfferList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["ManagedOffer"][];
+        };
+        PaginatedManagedProductProposalList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["ManagedProductProposal"][];
+        };
         PaginatedProductList: {
             /** @example 123 */
             count: number;
@@ -289,6 +674,42 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["PublicDepotList"][];
+        };
+        PaginatedStockMovementList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["StockMovement"][];
+        };
+        PatchedManagedDepotUpdateRequest: {
+            name?: string;
+            description?: string;
+            address?: string;
+            neighborhood?: string;
+            phone?: string;
+            /** Format: double */
+            latitude?: number;
+            /** Format: double */
+            longitude?: number;
+            /** Format: time */
+            opening_time?: string;
+            /** Format: time */
+            closing_time?: string;
+        };
+        PatchedManagedOfferUpdateRequest: {
+            is_active?: boolean;
+            notes?: string;
+            operations?: components["schemas"]["ManagedOfferOperationInputRequest"][];
+            exchange_brand_ids?: string[];
         };
         PatchedUpdateProfileRequest: {
             full_name?: string;
@@ -377,6 +798,9 @@ export interface components {
             readonly notes: string;
             readonly operations: components["schemas"]["PublicOfferOperation"][];
             readonly exchange_brands: components["schemas"]["Brand"][];
+            readonly available_full_quantity: number;
+            readonly available_new_quantity: number;
+            readonly stock_updated_at: string | null;
             /** Format: date-time */
             readonly updated_at: string;
         };
@@ -424,6 +848,67 @@ export interface components {
          * @enum {string}
          */
         RoleEnum: "CUSTOMER" | "DEPOT_MANAGER" | "ADMIN";
+        /**
+         * @description * `INVENTORY_CORRECTION` - Correction d'inventaire
+         *     * `MANUAL_ADJUSTMENT` - Ajustement manuel
+         * @enum {string}
+         */
+        StockAdjustRequestMovementTypeEnum: "INVENTORY_CORRECTION" | "MANUAL_ADJUSTMENT";
+        StockAdjustRequestRequest: {
+            /** Format: uuid */
+            product_id: string;
+            category: components["schemas"]["CategoryEnum"];
+            new_physical_quantity: number;
+            /** @default INVENTORY_CORRECTION */
+            movement_type: components["schemas"]["StockAdjustRequestMovementTypeEnum"];
+            reason: string;
+            expected_physical_quantity?: number;
+        };
+        StockMovement: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly product: components["schemas"]["Product"];
+            readonly category: components["schemas"]["CategoryEnum"];
+            readonly movement_type: components["schemas"]["StockMovementMovementTypeEnum"];
+            readonly quantity_before: number;
+            readonly quantity_after: number;
+            readonly delta: number;
+            readonly reason: string;
+            readonly actor_name: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /**
+         * @description * `RESTOCK` - Approvisionnement
+         *     * `MANUAL_ADJUSTMENT` - Ajustement manuel
+         *     * `INVENTORY_CORRECTION` - Correction d'inventaire
+         *     * `SCRAP` - Mise au rebut
+         *     * `RESERVATION` - Réservation
+         *     * `RELEASE` - Libération
+         *     * `PICKUP_OUT` - Remise client
+         *     * `EMPTY_RETURN` - Retour bouteille vide
+         * @enum {string}
+         */
+        StockMovementMovementTypeEnum: "RESTOCK" | "MANUAL_ADJUSTMENT" | "INVENTORY_CORRECTION" | "SCRAP" | "RESERVATION" | "RELEASE" | "PICKUP_OUT" | "EMPTY_RETURN";
+        StockMutationResponse: {
+            readonly stock: components["schemas"]["DepotStock"];
+            readonly movement: components["schemas"]["StockMovement"];
+        };
+        StockRestockRequestRequest: {
+            /** Format: uuid */
+            product_id: string;
+            category: components["schemas"]["CategoryEnum"];
+            quantity: number;
+            /** @default  */
+            reason: string;
+        };
+        StockScrapRequestRequest: {
+            /** Format: uuid */
+            product_id: string;
+            category: components["schemas"]["CategoryEnum"];
+            quantity: number;
+            reason: string;
+        };
         TokenRefreshResponse: {
             access_token: string;
         };
@@ -703,6 +1188,742 @@ export interface operations {
                 };
             };
             400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedDepot"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedManagedDepotUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedManagedDepotUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedManagedDepotUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedDepot"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_offers_list: {
+        parameters: {
+            query?: {
+                /** @description Un numéro de page de l'ensemble des résultats. */
+                page?: number;
+                /** @description Nombre de résultats à retourner par page. */
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedManagedOfferList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_offers_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManagedOfferCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ManagedOfferCreateRequest"];
+                "multipart/form-data": components["schemas"]["ManagedOfferCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedOffer"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_offers_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                offer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedOffer"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_offers_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                offer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_offers_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                offer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedManagedOfferUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedManagedOfferUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedManagedOfferUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedOffer"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_proposals_list: {
+        parameters: {
+            query?: {
+                /** @description Un numéro de page de l'ensemble des résultats. */
+                page?: number;
+                /** @description Nombre de résultats à retourner par page. */
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedManagedProductProposalList"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_proposals_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManagedProductProposalCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ManagedProductProposalCreateRequest"];
+                "multipart/form-data": components["schemas"]["ManagedProductProposalCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagedProductProposal"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_stock_movements_list: {
+        parameters: {
+            query?: {
+                /**
+                 * @description * `FULL` - Pleine
+                 *     * `EMPTY` - Vide
+                 *     * `NEW` - Neuve
+                 *     * `DEPOSIT` - Sous consigne
+                 */
+                category?: "FULL" | "EMPTY" | "NEW" | "DEPOSIT";
+                /**
+                 * @description * `RESTOCK` - Approvisionnement
+                 *     * `MANUAL_ADJUSTMENT` - Ajustement manuel
+                 *     * `INVENTORY_CORRECTION` - Correction d'inventaire
+                 *     * `SCRAP` - Mise au rebut
+                 *     * `RESERVATION` - Réservation
+                 *     * `RELEASE` - Libération
+                 *     * `PICKUP_OUT` - Remise client
+                 *     * `EMPTY_RETURN` - Retour bouteille vide
+                 */
+                movement_type?: "RESTOCK" | "MANUAL_ADJUSTMENT" | "INVENTORY_CORRECTION" | "SCRAP" | "RESERVATION" | "RELEASE" | "PICKUP_OUT" | "EMPTY_RETURN";
+                /** @description Un numéro de page de l'ensemble des résultats. */
+                page?: number;
+                /** @description Nombre de résultats à retourner par page. */
+                page_size?: number;
+                product?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedStockMovementList"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_stocks_list: {
+        parameters: {
+            query?: {
+                /**
+                 * @description * `FULL` - Pleine
+                 *     * `EMPTY` - Vide
+                 *     * `NEW` - Neuve
+                 *     * `DEPOSIT` - Sous consigne
+                 */
+                category?: "FULL" | "EMPTY" | "NEW" | "DEPOSIT";
+                /** @description Un numéro de page de l'ensemble des résultats. */
+                page?: number;
+                /** @description Nombre de résultats à retourner par page. */
+                page_size?: number;
+                product?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedDepotStockList"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_stocks_adjust_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StockAdjustRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["StockAdjustRequestRequest"];
+                "multipart/form-data": components["schemas"]["StockAdjustRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockMutationResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_stocks_restock_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StockRestockRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["StockRestockRequestRequest"];
+                "multipart/form-data": components["schemas"]["StockRestockRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockMutationResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_stocks_scrap_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StockScrapRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["StockScrapRequestRequest"];
+                "multipart/form-data": components["schemas"]["StockScrapRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StockMutationResponse"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

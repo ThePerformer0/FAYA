@@ -22,7 +22,7 @@ from django.db.models import (
 )
 from django.utils import timezone
 
-from apps.catalog.models import ProductStatus
+from apps.catalog.models import ProductProposal, ProductStatus
 from apps.core.exceptions import NotFoundDomainError
 from apps.core.models import PlatformSetting
 from apps.depots.models import (
@@ -32,6 +32,7 @@ from apps.depots.models import (
     OfferExchangeBrand,
     OfferOperation,
 )
+from apps.inventory.models import DepotStock, StockCategory
 
 
 class OpenStatus:
@@ -84,6 +85,13 @@ def compute_depot_open_state(
     )
 
 
+def _sellable_stocks_prefetch() -> Prefetch:
+    stocks_qs = DepotStock.objects.filter(
+        category__in=[StockCategory.FULL, StockCategory.NEW],
+    )
+    return Prefetch("stocks", queryset=stocks_qs, to_attr="sellable_stocks")
+
+
 def _public_offers_prefetch() -> Prefetch:
     active_ops = OfferOperation.objects.filter(is_active=True).order_by("operation_type")
     exchange_brands = (
@@ -125,7 +133,10 @@ def search_public_depots(
     tz = ZoneInfo(cfg.timezone)
     local_time = (at or timezone.now()).astimezone(tz).time()
 
-    qs = Depot.objects.filter(status=DepotStatus.ACTIVE).prefetch_related(_public_offers_prefetch())
+    qs = Depot.objects.filter(status=DepotStatus.ACTIVE).prefetch_related(
+        _public_offers_prefetch(),
+        _sellable_stocks_prefetch(),
+    )
 
     if q and q.strip():
         term = q.strip()
@@ -182,9 +193,44 @@ def get_public_depot_detail(*, depot_id: UUID) -> Depot:
     """Retourne un dépôt actif avec ses offres publiées, sinon 404."""
     depot = (
         Depot.objects.filter(pk=depot_id, status=DepotStatus.ACTIVE)
-        .prefetch_related(_public_offers_prefetch())
+        .prefetch_related(_public_offers_prefetch(), _sellable_stocks_prefetch())
         .first()
     )
     if depot is None:
         raise NotFoundDomainError("Dépôt introuvable.", code="NOT_FOUND")
     return depot
+
+
+def list_managed_depot_offers(*, depot: Depot) -> QuerySet[DepotProductOffer]:
+    """Liste toutes les offres (actives et inactives) appartenant au dépôt géré."""
+    return (
+        DepotProductOffer.objects.select_related("product", "product__brand")
+        .filter(depot=depot)
+        .prefetch_related(
+            Prefetch("operations", queryset=OfferOperation.objects.order_by("operation_type")),
+            Prefetch(
+                "exchange_brands",
+                queryset=OfferExchangeBrand.objects.select_related("accepted_brand").order_by(
+                    "accepted_brand__name"
+                ),
+            ),
+        )
+        .order_by("product__brand__name", "product__capacity_kg", "id")
+    )
+
+
+def get_managed_depot_offer(*, depot: Depot, offer_id: UUID) -> DepotProductOffer:
+    """Retourne une offre appartenant strictement au dépôt géré, sinon 404."""
+    offer = list_managed_depot_offers(depot=depot).filter(pk=offer_id).first()
+    if offer is None:
+        raise NotFoundDomainError("Offre introuvable.", code="NOT_FOUND")
+    return offer
+
+
+def list_managed_depot_proposals(*, depot: Depot) -> QuerySet[ProductProposal]:
+    """Liste les propositions de produits soumises par le dépôt géré."""
+    return (
+        ProductProposal.objects.select_related("created_product", "created_product__brand")
+        .filter(depot=depot)
+        .order_by("-created_at", "-id")
+    )
