@@ -15,12 +15,18 @@ import { NetworkProvider } from "./shared/NetworkContext";
 function DepotPortalPlaceholder() {
   const { t } = useTranslation();
   return (
-    <div className="mx-auto w-full max-w-xl px-4 py-6">
-      <div className="rounded-lg border-card border-border-strong bg-bg p-5">
-        <h1 className="font-display text-2xl font-bold uppercase tracking-[0.5px] text-text">
-          {t("depotPortal.title")}
-        </h1>
-        <p className="mt-2 text-base text-text-secondary">{t("depotPortal.body")}</p>
+    <div className="flex flex-1 flex-col">
+      <div className="bg-header-bg px-4 pt-3 pb-5 text-text-inverse">
+        <div className="mx-auto max-w-xl">
+          <h1 className="font-display text-2xl font-bold uppercase tracking-[0.5px]">
+            {t("depotPortal.title")}
+          </h1>
+        </div>
+      </div>
+      <div className="mx-auto w-full max-w-xl px-4 py-6">
+        <div className="border-l-4 border-ink-900 bg-card p-5">
+          <p className="text-base text-text-secondary">{t("depotPortal.body")}</p>
+        </div>
       </div>
     </div>
   );

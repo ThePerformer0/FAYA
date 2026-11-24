@@ -65,47 +65,43 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-lg px-4 py-6 space-y-4">
-      <div className="rounded-lg border-card border-border-strong bg-bg p-5">
-        <div className="flex flex-wrap items-start justify-between gap-2 border-b border-divider pb-4">
+    <div className="flex flex-1 flex-col">
+      <div className="bg-header-bg px-4 pt-3 pb-6 text-text-inverse">
+        <div className="mx-auto flex max-w-lg flex-wrap items-center justify-between gap-2">
           <div>
-            <h1 className="font-display text-2xl font-bold uppercase tracking-[0.5px] text-text">
+            <h1 className="font-display text-2xl font-bold uppercase tracking-[0.5px]">
               {t("auth.profileTitle")}
             </h1>
-            <p className="mt-1 text-sm text-text-secondary">{user.email}</p>
+            <p className="mt-0.5 text-sm text-text-inverse-muted">{user.email}</p>
           </div>
-          <span className="inline-flex min-h-7 items-center rounded-sm border-card border-border-strong px-2 text-xs font-bold uppercase text-text">
+          <span className="inline-flex min-h-7 items-center rounded-sm bg-header-surface px-3 text-xs font-bold uppercase text-text-inverse">
             {t(`auth.roles.${user.role}`)}
           </span>
         </div>
+      </div>
 
+      <div className="mx-auto w-full max-w-lg space-y-6 px-4 py-6">
         {user.active_suspension && (
-          <div className="mt-4">
-            <ErrorBanner
-              message={t("auth.suspensionBanner", {
-                date: formatShortDate(user.active_suspension.ends_at, i18n.language),
-              })}
-            />
-          </div>
+          <ErrorBanner
+            message={t("auth.suspensionBanner", {
+              date: formatShortDate(user.active_suspension.ends_at, i18n.language),
+            })}
+          />
         )}
 
-        {feedback?.type === "err" && (
-          <div className="mt-4">
-            <ErrorBanner message={feedback.text} />
-          </div>
-        )}
+        {feedback?.type === "err" && <ErrorBanner message={feedback.text} />}
 
         {feedback?.type === "ok" && (
           <div
             role="status"
-            className="mt-4 flex items-center gap-2 rounded-md border-card border-border-strong bg-surface-muted px-3 py-2.5 text-sm font-bold text-text"
+            className="flex items-center gap-2 border-l-4 border-open bg-open-bg px-3.5 py-2.5 text-sm font-bold text-open"
           >
             <IconCheck size={18} stroke={2} aria-hidden="true" />
             <span>{feedback.text}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-4" noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
           <TextField
             id="full_name"
             type="text"
@@ -142,25 +138,27 @@ export function ProfilePage() {
             </Button>
           </div>
         </form>
-      </div>
 
-      {/* Sélecteur de langue FR / EN dans Profil (DESIGN_SYSTEM §3.3 & §6) */}
-      <div className="rounded-lg border-card border-border-strong bg-bg p-5">
-        <h2 className="font-display text-lg font-bold uppercase tracking-[0.5px] text-text">
-          {t("language.label")}
-        </h2>
-        <div className="mt-2 flex flex-wrap gap-2">
-          <FilterChip
-            label={t("language.fr")}
-            selected={activeLang === "fr"}
-            onClick={() => setAppLanguage("fr")}
-          />
-          <FilterChip
-            label={t("language.en")}
-            selected={activeLang === "en"}
-            onClick={() => setAppLanguage("en")}
-          />
-        </div>
+        {/* Sélecteur de langue FR / EN séparé par un simple filet horizontal */}
+        <section className="border-t border-border pt-5">
+          <h2 className="font-display text-lg font-bold uppercase tracking-[0.5px] text-text">
+            {t("language.label")}
+          </h2>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <FilterChip
+              tone="light"
+              label={t("language.fr")}
+              selected={activeLang === "fr"}
+              onClick={() => setAppLanguage("fr")}
+            />
+            <FilterChip
+              tone="light"
+              label={t("language.en")}
+              selected={activeLang === "en"}
+              onClick={() => setAppLanguage("en")}
+            />
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -8,16 +8,22 @@ export function OrdersPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="mx-auto w-full max-w-xl px-4 py-6">
-      <h1 className="mb-4 font-display text-2xl font-bold uppercase tracking-[0.5px] text-text">
-        {t("orders.title")}
-      </h1>
-      <EmptyState
-        title={t("orders.emptyTitle")}
-        body={t("orders.emptyBody")}
-        actionLabel={t("orders.findDepot")}
-        onAction={() => navigate("/")}
-      />
+    <div className="flex flex-1 flex-col">
+      <div className="bg-header-bg px-4 pt-3 pb-5 text-text-inverse">
+        <div className="mx-auto max-w-xl">
+          <h1 className="font-display text-2xl font-bold uppercase tracking-[0.5px]">
+            {t("orders.title")}
+          </h1>
+        </div>
+      </div>
+      <div className="mx-auto w-full max-w-xl px-4 py-5">
+        <EmptyState
+          title={t("orders.emptyTitle")}
+          body={t("orders.emptyBody")}
+          actionLabel={t("orders.findDepot")}
+          onAction={() => navigate("/")}
+        />
+      </div>
     </div>
   );
 }

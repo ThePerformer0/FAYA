@@ -60,20 +60,25 @@ export function LoginPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-md px-4 py-6">
-      <div className="rounded-lg border-card border-border-strong bg-bg p-5">
-        <h1 className="font-display text-2xl font-bold uppercase tracking-[0.5px] text-text">
-          {t("auth.loginTitle")}
-        </h1>
-        <p className="mt-1.5 text-base text-text-secondary">{t("auth.loginSubtitle")}</p>
+    <div className="flex flex-1 flex-col">
+      <div className="bg-header-bg px-4 pt-3 pb-6 text-text-inverse">
+        <div className="mx-auto max-w-md">
+          <h1 className="font-display text-2xl font-bold uppercase tracking-[0.5px]">
+            {t("auth.loginTitle")}
+          </h1>
+          <p className="mt-1 text-sm text-text-inverse-muted">{t("auth.loginSubtitle")}</p>
+        </div>
+      </div>
 
+      {/* Formulaire posé directement sur le sable (zéro boîte blanche encadrée 1px) */}
+      <div className="mx-auto w-full max-w-md px-4 py-6">
         {serverError && (
-          <div className="mt-4">
+          <div className="mb-5">
             <ErrorBanner message={serverError} />
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="mt-5 space-y-4" noValidate>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
           <TextField
             id="email"
             type="email"
@@ -105,7 +110,7 @@ export function LoginPage() {
           </div>
         </form>
 
-        <p className="mt-5 text-center text-sm text-text-secondary">
+        <p className="mt-6 text-center text-sm text-text-secondary">
           {t("auth.noAccount")}{" "}
           <Link to="/register" className="font-bold text-text-brand underline">
             {t("auth.createAccountLink")}

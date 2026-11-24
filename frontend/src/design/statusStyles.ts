@@ -1,22 +1,22 @@
 /**
- * Styles complets des états Faya (DESIGN_SYSTEM §2.3, §2.4, §2.9).
+ * Styles complets des états Faya (Fusion A + B : Braise sur Sable).
  * Les classes sont littérales afin que Tailwind v4 les détecte statiquement.
  */
 
 export const ORDER_STATUS = {
   PENDING: {
     icon: "hourglass-high",
-    cls: "bg-bg text-text border-card border-dashed border-border-strong",
+    cls: "bg-price-band text-text border-hair border-dashed border-ink-600",
     labelKey: "order.status.pending",
   },
   CONFIRMED: {
     icon: "check",
-    cls: "bg-ink-900 text-text-inverse",
+    cls: "bg-open-bg text-open",
     labelKey: "order.status.confirmed",
   },
   PICKED_UP: {
     icon: "circle-check",
-    cls: "bg-bg text-text border-card border-solid border-border-strong",
+    cls: "bg-ink-900 text-text-inverse",
     labelKey: "order.status.pickedUp",
   },
   REFUSED: {
@@ -26,12 +26,12 @@ export const ORDER_STATUS = {
   },
   EXPIRED: {
     icon: "clock-off",
-    cls: "bg-surface-muted text-text-secondary",
+    cls: "bg-closed-bg text-closed",
     labelKey: "order.status.expired",
   },
   CANCELLED: {
     icon: "ban",
-    cls: "bg-surface-muted text-text-secondary",
+    cls: "bg-closed-bg text-closed",
     labelKey: "order.status.cancelled",
   },
 } as const;
@@ -48,17 +48,17 @@ export const STORE_STATUS: Record<
 > = {
   OPEN: {
     glyph: "dot-full",
-    cls: "bg-bg text-text border-card border-solid border-border-strong",
+    cls: "bg-open-bg text-open",
     labelKey: "store.status.open",
   },
   CLOSING_SOON: {
     glyph: "dot-half",
-    cls: "bg-ink-900 text-text-inverse",
+    cls: "bg-soon-bg text-soon",
     labelKey: "store.status.closingSoon",
   },
   CLOSED: {
     glyph: "dot-empty",
-    cls: "bg-surface-muted text-text-secondary border-hair border-border",
+    cls: "bg-closed-bg text-closed",
     labelKey: "store.status.closed",
   },
 };

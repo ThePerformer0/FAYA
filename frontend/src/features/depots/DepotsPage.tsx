@@ -1,6 +1,6 @@
 /**
- * Écran Dépôts : recherche, filtres, liste par défaut sur mobile, split-view desktop (DESIGN_SYSTEM §3.5).
- * Leaflet n'est chargé dynamiquement qu'à l'ouverture de la carte ou sur desktop (≥ 64 rem).
+ * Écran Dépôts — Fusion « Braise sur Sable » (A + B).
+ * Bloc supérieur charbon (recherche + filtres pilules) + liste sur fond sable chaud + carte Leaflet paresseuse.
  */
 
 import {
@@ -15,7 +15,6 @@ import { useTranslation } from "react-i18next";
 
 import { formatCapacityKg } from "../../design/formatters";
 import {
-  Button,
   EmptyState,
   ErrorBanner,
   FilterChip,
@@ -53,10 +52,8 @@ export function DepotsPage() {
   const { t, i18n } = useTranslation();
   const isDesktop = useIsDesktop();
 
-  // Vue mobile : liste par défaut (DESIGN_SYSTEM §3.5)
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
 
-  // Filtres de recherche
   const [searchInput, setSearchInput] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [selectedBrandId, setSelectedBrandId] = useState<string | undefined>(undefined);
@@ -64,11 +61,9 @@ export function DepotsPage() {
   const [selectedOperation, setSelectedOperation] = useState<OperationType | undefined>(undefined);
   const [openNow, setOpenNow] = useState(false);
 
-  // Géolocalisation optionnelle avec explication préalable (DESIGN_SYSTEM §5.2)
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoStatus, setGeoStatus] = useState<"idle" | "prompt" | "locating" | "denied" | "unsupported">("idle");
 
-  // Sélection bidirectionnelle liste <-> carte
   const [selectedDepotId, setSelectedDepotId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -160,15 +155,15 @@ export function DepotsPage() {
 
   return (
     <div className="flex flex-1 flex-col lg:h-[calc(100dvh-3.5rem)] lg:flex-row lg:overflow-hidden">
-      {/* Colonne gauche (liste + recherche + filtres) */}
+      {/* Colonne gauche (recherche charbon + liste sur fond sable chaud) */}
       <section
         aria-label={t("search.title")}
-        className={`flex flex-col bg-bg lg:w-[25rem] lg:shrink-0 lg:border-r lg:border-divider lg:overflow-y-auto ${
+        className={`flex flex-col bg-bg lg:w-[26rem] lg:shrink-0 lg:border-r lg:border-card-border lg:overflow-y-auto ${
           !isDesktop && mobileView === "map" ? "hidden" : "flex-1"
         }`}
       >
-        {/* Zone recherche + localisation + filtres */}
-        <div className="sticky top-0 z-10 border-b border-divider bg-bg px-4 pt-3 pb-2">
+        {/* Bloc recherche + filtres dans le bandeau charbon unifié (zéro bordure grise) */}
+        <div className="sticky top-0 z-10 bg-header-bg px-4 pt-2 pb-3.5 text-text-inverse">
           <div className="flex items-center gap-2">
             <div className="relative flex-1">
               <label htmlFor="depot-search-q" className="sr-only">
@@ -177,7 +172,7 @@ export function DepotsPage() {
               <IconSearch
                 size={20}
                 stroke={1.75}
-                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-secondary"
+                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-inverse-muted"
                 aria-hidden="true"
               />
               <input
@@ -186,7 +181,7 @@ export function DepotsPage() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder={t("search.placeholder")}
-                className="h-12 w-full rounded-md border-card border-ink-600 bg-white pr-10 pl-10 text-base text-text placeholder:text-text-muted focus:border-border-strong focus:outline-none"
+                className="h-12 w-full rounded-sm bg-header-surface pr-10 pl-10 text-base text-text-inverse placeholder:text-text-inverse-muted focus:bg-ink-700 focus:outline-none"
               />
               {searchInput && (
                 <button
@@ -196,7 +191,7 @@ export function DepotsPage() {
                     setDebouncedQuery("");
                   }}
                   aria-label={t("search.clearSearch")}
-                  className="absolute top-1/2 right-1 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md text-text-secondary hover:bg-surface-muted"
+                  className="absolute top-1/2 right-1 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-sm text-text-inverse-muted hover:bg-ink-700 hover:text-text-inverse"
                 >
                   <IconX size={18} stroke={1.75} aria-hidden="true" />
                 </button>
@@ -208,10 +203,10 @@ export function DepotsPage() {
               onClick={handleGeoButtonClick}
               aria-label={userCoords ? t("geo.clearLocation") : t("geo.useMyLocation")}
               aria-pressed={Boolean(userCoords)}
-              className={`touch-target inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-md border-card px-3 text-sm font-bold transition-colors duration-150 ${
+              className={`touch-target inline-flex h-12 shrink-0 items-center justify-center gap-1.5 rounded-sm px-3 text-sm font-bold transition-colors duration-150 ${
                 userCoords
-                  ? "border-border-strong bg-ink-900 text-text-inverse"
-                  : "border-border-strong bg-bg text-text hover:bg-surface-muted"
+                  ? "bg-action text-on-action"
+                  : "bg-header-surface text-text-inverse hover:bg-ink-700"
               }`}
             >
               <IconCurrentLocation size={20} stroke={1.75} aria-hidden="true" />
@@ -225,40 +220,48 @@ export function DepotsPage() {
             </button>
           </div>
 
-          {/* Explication avant demande GPS (DESIGN_SYSTEM §5.2) */}
           {geoStatus === "prompt" && (
-            <div className="mt-2 rounded-md border-card border-border-strong bg-surface-muted p-3 text-sm text-text">
-              <p>{t("geo.rationale")}</p>
-              <div className="mt-2.5 flex flex-wrap gap-2">
-                <Button variant="secondary" onClick={requestGeolocation}>
+            <div className="mt-2.5 border-l-4 border-action bg-header-surface p-3 text-sm text-text-inverse">
+              <p className="text-text-inverse/90">{t("geo.rationale")}</p>
+              <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={requestGeolocation}
+                  className="inline-flex min-h-10 items-center rounded-sm bg-action px-3.5 text-sm font-bold text-on-action hover:bg-action-pressed"
+                >
                   {t("geo.useMyLocation")}
-                </Button>
-                <Button variant="link" onClick={() => setGeoStatus("idle")}>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGeoStatus("idle")}
+                  className="inline-flex min-h-10 items-center px-2 text-sm font-medium text-text-inverse-muted underline hover:text-text-inverse"
+                >
                   {t("errors.close")}
-                </Button>
+                </button>
               </div>
             </div>
           )}
 
           {geoStatus === "denied" && (
-            <p role="status" className="mt-2 rounded-md bg-surface-muted px-3 py-2 text-sm text-text-secondary">
+            <p role="status" className="mt-2 rounded-md bg-header-surface px-3 py-2 text-xs text-text-inverse-muted">
               {t("geo.denied")}
             </p>
           )}
 
           {geoStatus === "unsupported" && (
-            <p role="status" className="mt-2 rounded-md bg-surface-muted px-3 py-2 text-sm text-text-secondary">
+            <p role="status" className="mt-2 rounded-md bg-header-surface px-3 py-2 text-xs text-text-inverse-muted">
               {t("geo.unsupported")}
             </p>
           )}
 
-          {/* Pastilles de filtres défilantes */}
+          {/* Pastilles de filtres sombres avec accent rouge Faya */}
           <div
-            className="mt-2 flex items-center gap-2 overflow-x-auto pb-1"
+            className="mt-2 flex items-center gap-2 overflow-x-auto pb-0.5"
             role="group"
             aria-label={t("search.title")}
           >
             <FilterChip
+              tone="dark"
               label={t("search.openNow")}
               selected={openNow}
               onClick={() => setOpenNow((v) => !v)}
@@ -267,6 +270,7 @@ export function DepotsPage() {
             {OPERATIONS.map((op) => (
               <FilterChip
                 key={op}
+                tone="dark"
                 label={t(`operation.${op}`)}
                 selected={selectedOperation === op}
                 onClick={() =>
@@ -278,6 +282,7 @@ export function DepotsPage() {
             {COMMON_CAPACITIES.map((cap) => (
               <FilterChip
                 key={cap}
+                tone="dark"
                 label={formatCapacityKg(cap, i18n.language)}
                 selected={selectedCapacity === cap}
                 onClick={() =>
@@ -289,6 +294,7 @@ export function DepotsPage() {
             {brands.map((brand) => (
               <FilterChip
                 key={brand.id}
+                tone="dark"
                 label={brand.name}
                 selected={selectedBrandId === brand.id}
                 onClick={() =>
@@ -297,27 +303,27 @@ export function DepotsPage() {
               />
             ))}
           </div>
+        </div>
 
-          {/* Compteur + réinitialisation */}
-          <div className="mt-1 flex items-center justify-between text-xs text-text-secondary">
-            <span>
-              {isLoading ? "…" : t("search.resultsCount", { count: totalCount })}
-              {isFetching && !isLoading ? " · …" : ""}
-            </span>
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="font-bold text-text-brand underline py-1"
-              >
-                {t("search.resetFilters")}
-              </button>
-            )}
-          </div>
+        {/* Barre compteur + réinitialisation sur fond sable */}
+        <div className="flex items-center justify-between px-4 pt-3 pb-1 text-xs text-text-secondary">
+          <span className="font-medium">
+            {isLoading ? "…" : t("search.resultsCount", { count: totalCount })}
+            {isFetching && !isLoading ? " · …" : ""}
+          </span>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="py-1 font-bold text-text-brand underline"
+            >
+              {t("search.resetFilters")}
+            </button>
+          )}
         </div>
 
         {/* Liste des dépôts */}
-        <div className="flex-1 space-y-3 px-4 pt-3 pb-24 lg:pb-6">
+        <div className="flex-1 space-y-3 px-4 pt-2 pb-24 lg:pb-6">
           {error ? (
             <ErrorBanner
               title={t("errors.serverTitle")}
@@ -353,7 +359,7 @@ export function DepotsPage() {
         </div>
       </section>
 
-      {/* Panneau carte (chargé uniquement si desktop ou clic sur « Carte » sur mobile) */}
+      {/* Carte Leaflet */}
       {shouldRenderMap && (
         <section
           aria-label={t("search.viewMap")}
@@ -376,9 +382,8 @@ export function DepotsPage() {
             />
           </Suspense>
 
-          {/* Carte aperçu compacte en bas sur mobile quand un repère est sélectionné (DESIGN_SYSTEM §3.5) */}
           {!isDesktop && selectedDepot && (
-            <div className="absolute right-3 bottom-20 left-3 z-[400] shadow-sheet rounded-lg">
+            <div className="absolute right-3 bottom-20 left-3 z-[400] shadow-sheet">
               <DepotCard
                 depot={selectedDepot}
                 serverNow={settings?.server_now}
@@ -392,16 +397,16 @@ export function DepotsPage() {
         </section>
       )}
 
-      {/* Bouton flottant mobile « Carte » / « Liste » (hauteur 48 px, centré, DESIGN_SYSTEM §3.5) */}
+      {/* Bouton flottant mobile Carte / Liste */}
       {!isDesktop && (
-        <div className="pointer-events-none fixed right-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] left-0 z-[450] flex justify-center">
+        <div className="pointer-events-none fixed right-0 bottom-[calc(4.25rem+var(--safe-bottom))] left-0 z-[450] flex justify-center">
           <button
             type="button"
             onClick={() => {
               setSelectedDepotId(null);
               setMobileView((v) => (v === "list" ? "map" : "list"));
             }}
-            className="pointer-events-auto inline-flex h-12 items-center gap-2 rounded-full border-card border-border-strong bg-ink-900 px-5 font-sans text-base font-bold text-text-inverse shadow-popover"
+            className="pointer-events-auto inline-flex h-12 items-center gap-2 rounded-full bg-header-bg px-5 font-sans text-base font-bold text-text-inverse shadow-popover"
           >
             {mobileView === "list" ? (
               <>

@@ -17,8 +17,8 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   if (isBootstrapping) {
     return (
       <div className="mx-auto flex w-full max-w-md flex-col gap-3 px-4 py-10">
-        <div className="h-8 w-48 rounded-sm bg-surface-muted animate-skeleton" />
-        <div className="h-32 w-full rounded-lg bg-surface-muted animate-skeleton" />
+        <div className="h-8 w-48 bg-surface-muted animate-skeleton" />
+        <div className="h-32 w-full bg-surface-muted animate-skeleton" />
         <p className="text-sm text-text-secondary">{t("auth.checkingSession")}</p>
       </div>
     );

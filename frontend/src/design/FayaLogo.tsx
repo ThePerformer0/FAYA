@@ -68,12 +68,14 @@ export function FayaMark({ variant = "color", size = 30, className = "" }: FayaM
 export function FayaWordmark({
   variant = "color",
   size = 30,
+  onDark = false,
 }: {
   variant?: "color" | "ink" | "paper";
   size?: number;
+  onDark?: boolean;
 }) {
-  const ink = variant === "paper" ? "#FDFDFF" : "#1C1814";
-  const accent = variant === "ink" ? "#1C1814" : "#F42902";
+  const ink = onDark || variant === "paper" ? "#FDFDFF" : "#181411";
+  const accent = variant === "ink" ? "#181411" : "#F42902";
 
   return (
     <span className="inline-flex items-center gap-2.5">

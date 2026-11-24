@@ -1,6 +1,7 @@
 /**
- * Composants de base Faya (DESIGN_SYSTEM §4.0, §4.8, §4.9).
- * Aucune couleur Tailwind par défaut, aucun dégradé, aucune ombre décorative.
+ * Composants de base Faya — Esthétique éditoriale architecturale (« Braise sur Sable »).
+ * Zéro bordure 1px grise générique autour des cartes/blocs : séparation par surfaces franches,
+ * barres d'accent de 4 px et hiérarchie typographique.
  */
 
 import {
@@ -54,7 +55,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   let variantCls = "";
   if (isDisabled && variant !== "link") {
     variantCls =
-      "min-h-14 rounded-md bg-surface-muted text-text-secondary border-hair border-border cursor-not-allowed";
+      "min-h-14 rounded-md bg-surface-muted text-text-secondary cursor-not-allowed";
   } else if (variant === "primary") {
     variantCls =
       "min-h-14 rounded-md bg-action text-on-action active:bg-action-pressed hover:bg-action-pressed font-display font-bold text-lg uppercase tracking-[0.5px]";
@@ -63,7 +64,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       "min-h-14 rounded-md bg-danger text-on-action font-display font-bold text-lg uppercase tracking-[0.5px]";
   } else if (variant === "secondary") {
     variantCls =
-      "min-h-12 rounded-md bg-transparent text-text border-card border-border-strong hover:bg-surface-muted font-sans font-bold text-base";
+      "min-h-12 rounded-md bg-surface-muted text-text hover:bg-border font-sans font-bold text-base";
   } else {
     variantCls =
       "min-h-12 px-2 bg-transparent text-text-brand underline font-sans font-medium text-base hover:text-text";
@@ -82,7 +83,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   );
 });
 
-/* === Champ de formulaire === */
+/* === Champ de formulaire (surface franche + ligne d'ancrage inférieure, zéro boîte grise) === */
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   id: string;
@@ -100,7 +101,7 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
 
   return (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="block text-sm font-bold text-text">
+      <label htmlFor={id} className="block text-sm font-bold uppercase tracking-[0.3px] text-text-secondary">
         {label}
       </label>
       <input
@@ -108,10 +109,10 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
         id={id}
         aria-invalid={error ? "true" : "false"}
         aria-describedby={errorId ?? hintId}
-        className={`h-12 w-full rounded-md bg-white px-3 text-base text-text placeholder:text-text-muted focus:outline-none ${
+        className={`h-12 w-full rounded-t-sm rounded-b-none bg-card px-3.5 text-base text-text placeholder:text-text-muted border-b-2 focus:outline-none transition-colors duration-150 ${
           error
-            ? "border-2 border-danger"
-            : "border-card border-ink-600 focus:border-border-strong"
+            ? "border-danger bg-danger-bg/40"
+            : "border-ink-900/20 focus:border-action"
         } ${className}`}
         {...rest}
       />
@@ -129,32 +130,32 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
   );
 });
 
-/* === Glyphes d'ouverture (SVG maison en currentColor, DESIGN_SYSTEM §2.4 & §7.2) === */
+/* === Glyphes d'ouverture (SVG maison en currentColor) === */
 
 export function OpenStatusGlyph({ glyph }: { glyph: "dot-full" | "dot-half" | "dot-empty" }) {
   if (glyph === "dot-full") {
     return (
-      <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" className="shrink-0">
+      <svg width="9" height="9" viewBox="0 0 12 12" aria-hidden="true" className="shrink-0">
         <circle cx="6" cy="6" r="5" fill="currentColor" />
       </svg>
     );
   }
   if (glyph === "dot-half") {
     return (
-      <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" className="shrink-0">
+      <svg width="9" height="9" viewBox="0 0 12 12" aria-hidden="true" className="shrink-0">
         <circle cx="6" cy="6" r="4.75" fill="none" stroke="currentColor" strokeWidth="1.5" />
         <path d="M6 1.25 A4.75 4.75 0 0 0 6 10.75 Z" fill="currentColor" />
       </svg>
     );
   }
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true" className="shrink-0">
+    <svg width="9" height="9" viewBox="0 0 12 12" aria-hidden="true" className="shrink-0">
       <circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );
 }
 
-/* === Puce d'ouverture dépôt === */
+/* === Étiquette d'ouverture dépôt (coins nets, zéro bordure) === */
 
 interface OpenStatusChipProps {
   openStatus: string;
@@ -171,7 +172,7 @@ export function OpenStatusChip({ openStatus, closingTime, reopensAt }: OpenStatu
 
   return (
     <span
-      className={`inline-flex min-h-7 items-center gap-1.5 rounded-sm px-2 py-0.5 text-sm font-bold ${spec.cls}`}
+      className={`inline-flex min-h-6 items-center gap-1.5 rounded-sm px-2.5 py-0.5 text-xs font-bold tracking-[0.2px] ${spec.cls}`}
     >
       <OpenStatusGlyph glyph={spec.glyph} />
       <span>{t(spec.labelKey, { time: displayTime })}</span>
@@ -179,15 +180,25 @@ export function OpenStatusChip({ openStatus, closingTime, reopensAt }: OpenStatu
   );
 }
 
-/* === Pastille de filtre (hauteur visible 40 px, zone tactile 48 px, icône check si sélectionnée) === */
+/* === Pastille de filtre (surface pleine nette sans bordure grise) === */
 
 interface FilterChipProps {
   label: string;
   selected: boolean;
   onClick: () => void;
+  tone?: "light" | "dark";
 }
 
-export function FilterChip({ label, selected, onClick }: FilterChipProps) {
+export function FilterChip({ label, selected, onClick, tone = "light" }: FilterChipProps) {
+  const pillCls =
+    tone === "dark"
+      ? selected
+        ? "bg-action text-on-action"
+        : "bg-header-surface text-text-inverse hover:bg-ink-700"
+      : selected
+        ? "bg-ink-900 text-text-inverse"
+        : "bg-surface-muted text-text hover:bg-border";
+
   return (
     <button
       type="button"
@@ -196,20 +207,16 @@ export function FilterChip({ label, selected, onClick }: FilterChipProps) {
       className="inline-flex min-h-12 shrink-0 items-center py-1"
     >
       <span
-        className={`inline-flex h-10 items-center gap-1.5 rounded-md border-card border-border-strong px-3 text-sm font-bold transition-colors duration-150 ${
-          selected
-            ? "bg-ink-900 text-text-inverse"
-            : "bg-bg text-text hover:bg-surface-muted"
-        }`}
+        className={`inline-flex h-9 items-center gap-1.5 rounded-sm px-3 text-sm font-bold transition-colors duration-150 ${pillCls}`}
       >
-        {selected && <IconCheck size={16} stroke={2} aria-hidden="true" />}
+        {selected && <IconCheck size={15} stroke={2.2} aria-hidden="true" />}
         <span>{label}</span>
       </span>
     </button>
   );
 }
 
-/* === Fraîcheur des données (DESIGN_SYSTEM §4.8) === */
+/* === Fraîcheur des données === */
 
 interface FreshnessStampProps {
   updatedAt: string;
@@ -267,7 +274,7 @@ export function FreshnessStamp({ updatedAt, serverNow, suffix }: FreshnessStampP
   );
 }
 
-/* === Bandeau d'erreur (DESIGN_SYSTEM §4.9) === */
+/* === Bandeau d'erreur (barre d'accent gauche 4 px, zéro bordure grise) === */
 
 interface ErrorBannerProps {
   title?: string;
@@ -282,7 +289,7 @@ export function ErrorBanner({ title, message, reference, onRetry }: ErrorBannerP
   return (
     <div
       role="alert"
-      className="rounded-md border-hair border-danger bg-danger-bg p-3 text-danger"
+      className="border-l-4 border-danger bg-danger-bg p-3.5 text-danger"
     >
       <div className="flex items-start gap-2">
         <IconAlertTriangle size={20} stroke={1.75} className="mt-0.5 shrink-0" aria-hidden="true" />
@@ -303,7 +310,7 @@ export function ErrorBanner({ title, message, reference, onRetry }: ErrorBannerP
   );
 }
 
-/* === État vide (DESIGN_SYSTEM §4.9 : marque Faya ink-300 64px) === */
+/* === État vide (posé net sans boîte encadrée) === */
 
 interface EmptyStateProps {
   title: string;
@@ -314,7 +321,7 @@ interface EmptyStateProps {
 
 export function EmptyState({ title, body, actionLabel, onAction }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border-card border-border bg-bg px-6 py-10 text-center">
+    <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
       <FayaMark variant="muted" size={64} />
       <h2 className="mt-4 font-display text-xl font-bold uppercase tracking-[0.5px] text-text">
         {title}
@@ -331,7 +338,7 @@ export function EmptyState({ title, body, actionLabel, onAction }: EmptyStatePro
   );
 }
 
-/* === Bandeau hors ligne (DESIGN_SYSTEM §4.8) === */
+/* === Bandeau hors ligne === */
 
 interface OfflineBannerProps {
   isOnline: boolean;
@@ -350,9 +357,9 @@ export function OfflineBanner({ isOnline, justRestored, lastSyncIso }: OfflineBa
     return (
       <div
         role="status"
-        className="flex min-h-10 items-center justify-center gap-2 border-b border-offline-border bg-offline-bg px-4 text-sm font-bold text-text"
+        className="flex min-h-10 items-center justify-center gap-2 bg-open-bg px-4 text-sm font-bold text-open"
       >
-        <IconCheck size={18} stroke={1.75} aria-hidden="true" />
+        <IconCheck size={18} stroke={2} aria-hidden="true" />
         <span>{t("net.restored")}</span>
       </div>
     );
@@ -362,7 +369,7 @@ export function OfflineBanner({ isOnline, justRestored, lastSyncIso }: OfflineBa
   return (
     <div
       role="status"
-      className="flex min-h-10 items-center justify-center gap-2 border-b border-offline-border bg-offline-bg px-4 text-sm font-medium text-text"
+      className="flex min-h-10 items-center justify-center gap-2 bg-offline-bg px-4 text-sm font-medium text-text-inverse"
     >
       <IconWifiOff size={18} stroke={1.75} aria-hidden="true" />
       <span>
@@ -374,7 +381,7 @@ export function OfflineBanner({ isOnline, justRestored, lastSyncIso }: OfflineBa
   );
 }
 
-/* === Panneau du bas (BottomSheet, DESIGN_SYSTEM §4.0) === */
+/* === Panneau du bas (BottomSheet) === */
 
 interface BottomSheetProps {
   open: boolean;
@@ -401,7 +408,7 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/40 md:items-center md:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink-900/55 md:items-center md:p-4"
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -409,9 +416,9 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-t-xl bg-bg p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-sheet md:rounded-xl md:p-6">
-        <div className="mx-auto mb-3 h-1 w-8 rounded-full bg-ink-300 md:hidden" aria-hidden="true" />
-        <div className="flex items-center justify-between gap-2 pb-3 border-b border-divider">
+      <div className="max-h-[85dvh] w-full max-w-lg overflow-y-auto rounded-t-xl bg-bg p-4 pb-[calc(1rem+var(--safe-bottom))] shadow-sheet md:rounded-md md:p-6">
+        <div className="mx-auto mb-3 h-1 w-8 rounded-full bg-border md:hidden" aria-hidden="true" />
+        <div className="flex items-center justify-between gap-2 pb-3">
           <h2 className="font-display text-xl font-bold uppercase tracking-[0.5px] text-text">
             {title}
           </h2>
@@ -419,12 +426,12 @@ export function BottomSheet({ open, title, onClose, children }: BottomSheetProps
             type="button"
             onClick={onClose}
             aria-label={t("errors.close")}
-            className="touch-target inline-flex items-center justify-center rounded-md text-text hover:bg-surface-muted"
+            className="touch-target inline-flex items-center justify-center rounded-sm text-text hover:bg-surface-muted"
           >
             <IconX size={22} stroke={1.75} aria-hidden="true" />
           </button>
         </div>
-        <div className="mt-4">{children}</div>
+        <div className="mt-2">{children}</div>
       </div>
     </div>
   );

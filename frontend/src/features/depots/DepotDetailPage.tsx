@@ -1,6 +1,7 @@
 /**
- * Fiche détaillée d'un dépôt (DESIGN_SYSTEM §4.2 & §4.3).
- * Les horaires et l'heure limite de commande sont visibles avant toute action.
+ * Fiche détaillée d'un dépôt — Esthétique éditoriale architecturale (« Braise sur Sable »).
+ * Zéro boîte encadrée 1px grise : bandeau supérieur charbon, liste d'infos à même le sable,
+ * bloc tarifaire continu avec accent de 4 px et barre basse charbon.
  */
 
 import {
@@ -60,11 +61,9 @@ export function DepotDetailPage() {
   if (isLoading) {
     return (
       <div className="mx-auto w-full max-w-xl px-4 py-4 space-y-4">
-        <div className="h-8 w-24 rounded-sm bg-surface-muted animate-skeleton" />
-        <div className="h-9 w-3/4 rounded-sm bg-surface-muted animate-skeleton" />
-        <div className="h-7 w-48 rounded-sm bg-surface-muted animate-skeleton" />
-        <div className="h-28 w-full rounded-lg bg-surface-muted animate-skeleton" />
-        <div className="h-24 w-full rounded-lg bg-surface-muted animate-skeleton" />
+        <div className="h-36 w-full bg-surface-muted animate-skeleton" />
+        <div className="h-24 w-full bg-card animate-skeleton" />
+        <div className="h-24 w-full bg-card animate-skeleton" />
       </div>
     );
   }
@@ -120,189 +119,194 @@ export function DepotDetailPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-1 flex-col pb-28">
-      {/* Barre supérieure retour + carte optionnelle */}
-      <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-2">
-        <Link
-          to="/"
-          className="touch-target inline-flex items-center gap-1.5 rounded-md pr-3 text-base font-bold text-text hover:text-text-brand"
-        >
-          <IconArrowLeft size={20} stroke={1.75} aria-hidden="true" />
-          <span>{t("nav.back")}</span>
-        </Link>
+    <div className="flex flex-1 flex-col pb-28">
+      {/* En-tête charbon franc */}
+      <header className="bg-header-bg text-text-inverse">
+        <div className="mx-auto w-full max-w-xl px-4 pt-2 pb-5">
+          <div className="flex items-center justify-between gap-2">
+            <Link
+              to="/"
+              className="touch-target inline-flex items-center gap-1.5 pr-3 text-sm font-bold text-text-inverse hover:text-action"
+            >
+              <IconArrowLeft size={20} stroke={1.75} aria-hidden="true" />
+              <span>{t("nav.back")}</span>
+            </Link>
 
-        <button
-          type="button"
-          onClick={() => setShowMiniMap((v) => !v)}
-          className="touch-target inline-flex items-center gap-1.5 rounded-md border-card border-border-strong px-3 text-sm font-bold text-text hover:bg-surface-muted"
-        >
-          <IconMapPin size={18} stroke={1.75} aria-hidden="true" />
-          <span>{showMiniMap ? t("store.hideMap") : t("store.showMap")}</span>
-        </button>
-      </div>
+            <button
+              type="button"
+              onClick={() => setShowMiniMap((v) => !v)}
+              className="touch-target inline-flex h-10 items-center gap-1.5 rounded-sm bg-header-surface px-3.5 text-sm font-bold text-text-inverse hover:bg-ink-700"
+            >
+              <IconMapPin size={18} stroke={1.75} aria-hidden="true" />
+              <span>{showMiniMap ? t("store.hideMap") : t("store.showMap")}</span>
+            </button>
+          </div>
 
-      {/* Miniature carte chargée à la demande */}
-      {showMiniMap && (
-        <div className="mx-4 mb-3 h-52 overflow-hidden rounded-lg border-card border-border-strong">
-          <Suspense
-            fallback={<div className="h-full w-full bg-surface-muted animate-skeleton" />}
-          >
-            <LazyDepotsMap depots={mapPoints} selectedDepotId={depot.id} />
-          </Suspense>
-        </div>
-      )}
+          <h1 className="mt-2 font-display text-2xl font-bold uppercase tracking-[0.5px] text-text-inverse">
+            {depot.name}
+          </h1>
 
-      {/* En-tête identité + état d'ouverture + règle d'arrêt avant tout début de commande */}
-      <header className="px-4 pb-4 border-b border-divider">
-        <h1 className="font-display text-2xl font-bold uppercase tracking-[0.5px] text-text">
-          {depot.name}
-        </h1>
-
-        <div className="mt-2.5 flex flex-wrap items-center gap-2">
-          <OpenStatusChip
-            openStatus={depot.open_status}
-            closingTime={depot.closing_time}
-            reopensAt={depot.reopens_at}
-          />
-          {!isClosed && (
-            <span className="text-sm font-medium text-text-secondary">
-              {t("store.lastOrderUntil", { time: lastOrderHHMM })}
-            </span>
-          )}
-        </div>
-
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-base text-text-secondary">
+          <p className="mt-1 text-sm text-text-inverse-muted">
             {depot.address}
             {depot.neighborhood ? ` · ${depot.neighborhood}` : ""}
           </p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2.5">
+            <OpenStatusChip
+              openStatus={depot.open_status}
+              closingTime={depot.closing_time}
+              reopensAt={depot.reopens_at}
+            />
+            {!isClosed && (
+              <span className="text-xs font-medium text-text-inverse-muted">
+                {t("store.lastOrderUntil", { time: lastOrderHHMM })}
+              </span>
+            )}
+          </div>
+
+          {depot.description && (
+            <p className="mt-2.5 text-sm text-text-inverse-muted">{depot.description}</p>
+          )}
+        </div>
+      </header>
+
+      {/* Contenu éditorial sur fond sable chaud (zéro boîte encadrée 1px) */}
+      <div className="mx-auto w-full max-w-xl space-y-5 px-4 pt-4">
+        {/* Miniature carte chargée à la demande */}
+        {showMiniMap && (
+          <div className="h-56 overflow-hidden bg-surface-muted">
+            <Suspense
+              fallback={<div className="h-full w-full bg-surface-muted animate-skeleton" />}
+            >
+              <LazyDepotsMap depots={mapPoints} selectedDepotId={depot.id} />
+            </Suspense>
+          </div>
+        )}
+
+        {/* Boutons rapides Appeler / Itinéraire (surfaces pleines nettes) */}
+        <div className="grid grid-cols-2 gap-2.5">
+          <a
+            href={`tel:${depot.phone}`}
+            className="touch-target inline-flex items-center justify-center gap-2 rounded-sm bg-card px-4 py-3 text-base font-bold text-text hover:bg-price-band"
+          >
+            <IconPhone size={20} stroke={1.75} className="text-text-brand" aria-hidden="true" />
+            <span>{t("store.call")}</span>
+          </a>
+
           <a
             href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="touch-target inline-flex items-center gap-1.5 rounded-md border-card border-border-strong px-3 text-sm font-bold text-text hover:bg-surface-muted"
+            className="touch-target inline-flex items-center justify-center gap-2 rounded-sm bg-card px-4 py-3 text-base font-bold text-text hover:bg-price-band"
           >
-            <IconRoute size={18} stroke={1.75} aria-hidden="true" />
+            <IconRoute size={20} stroke={1.75} className="text-text-brand" aria-hidden="true" />
             <span>{t("store.directions")}</span>
           </a>
         </div>
 
-        {depot.description && (
-          <p className="mt-2 text-sm text-text-secondary">{depot.description}</p>
-        )}
-      </header>
+        {/* Informations pratiques posées directement à même le sable (filets horizontaux purs) */}
+        <dl className="divide-y divide-border text-base">
+          <div className="flex items-baseline justify-between gap-4 py-3">
+            <dt className="shrink-0 text-xs font-bold uppercase tracking-[0.5px] text-text-secondary">
+              {t("store.hoursLabel")}
+            </dt>
+            <dd className="text-right font-mono text-sm font-medium tabular text-text">
+              {t("store.hoursEveryDay", { open: openHHMM, close: closeHHMM })}
+            </dd>
+          </div>
 
-      {/* Informations pratiques */}
-      <dl className="divide-y divide-divider border-b border-divider px-4 text-base">
-        <div className="flex items-baseline justify-between gap-4 py-3">
-          <dt className="shrink-0 text-sm font-bold text-text-secondary">
-            {t("store.hoursLabel")}
-          </dt>
-          <dd className="text-right font-mono text-sm font-medium tabular text-text">
-            {t("store.hoursEveryDay", { open: openHHMM, close: closeHHMM })}
-          </dd>
-        </div>
-
-        <div className="flex items-center justify-between gap-4 py-3">
-          <dt className="shrink-0 text-sm font-bold text-text-secondary">
-            {t("store.contactLabel")}
-          </dt>
-          <dd className="flex items-center gap-2">
-            <span className="font-mono text-sm font-medium tabular text-text">
+          <div className="flex items-baseline justify-between gap-4 py-3">
+            <dt className="shrink-0 text-xs font-bold uppercase tracking-[0.5px] text-text-secondary">
+              {t("store.contactLabel")}
+            </dt>
+            <dd className="text-right font-mono text-sm font-medium tabular text-text">
               {depot.phone}
-            </span>
-            <a
-              href={`tel:${depot.phone}`}
-              className="inline-flex min-h-10 items-center gap-1 rounded-md border-card border-border-strong px-2.5 text-sm font-bold text-text hover:bg-surface-muted"
-            >
-              <IconPhone size={16} stroke={1.75} aria-hidden="true" />
-              <span>{t("store.call")}</span>
-            </a>
-          </dd>
-        </div>
+            </dd>
+          </div>
 
-        <div className="flex items-baseline justify-between gap-4 py-3">
-          <dt className="shrink-0 text-sm font-bold text-text-secondary">
-            {t("store.pickupLabel")}
-          </dt>
-          <dd className="text-right text-sm text-text">{t("store.pickupPayment")}</dd>
-        </div>
-      </dl>
+          <div className="flex items-baseline justify-between gap-4 py-3">
+            <dt className="shrink-0 text-xs font-bold uppercase tracking-[0.5px] text-text-secondary">
+              {t("store.pickupLabel")}
+            </dt>
+            <dd className="text-right text-sm text-text">{t("store.pickupPayment")}</dd>
+          </div>
+        </dl>
 
-      {/* Section PRODUITS */}
-      <section aria-labelledby="depot-products-heading" className="px-4 pt-4">
-        <h2
-          id="depot-products-heading"
-          className="font-display text-xl font-bold uppercase tracking-[0.5px] text-text"
-        >
-          {t("store.productsTitle")}
-        </h2>
+        {/* Section PRODUITS : bloc continu façon carte tarifaire imprimée */}
+        <section aria-labelledby="depot-products-heading" className="pt-1">
+          <h2
+            id="depot-products-heading"
+            className="font-display text-xl font-bold uppercase tracking-[0.6px] text-text"
+          >
+            {t("store.productsTitle")}
+          </h2>
 
-        {depot.offers.length === 0 ? (
-          <p className="mt-3 rounded-lg border-card border-border bg-surface-muted p-4 text-sm text-text-secondary">
-            {t("store.noActiveOffers")}
-          </p>
-        ) : (
-          <ul className="mt-3 space-y-2.5">
-            {depot.offers.map((offer) => {
-              const minPrice = offerMinPrice(offer);
-              return (
-                <li key={offer.id}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedOffer(offer)}
-                    className="flex min-h-16 w-full items-center justify-between gap-3 rounded-lg border-card border-border-strong bg-bg px-3 py-3 text-left transition-colors duration-150 hover:bg-surface-muted"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="font-sans text-base font-bold text-text">
-                        {offer.product.brand.name} ·{" "}
-                        {formatCapacityKg(offer.product.capacity_kg, i18n.language)}
-                      </p>
-                      <p className="mt-0.5 text-sm text-text-secondary">
-                        {offer.operations.length > 0
-                          ? offer.operations
-                              .map((op) => t(`operation.${op.operation_type}`))
-                              .join(" · ")
-                          : t("store.noActiveOperations")}
-                      </p>
-                    </div>
+          {depot.offers.length === 0 ? (
+            <p className="mt-2.5 bg-surface-muted p-4 text-sm text-text-secondary">
+              {t("store.noActiveOffers")}
+            </p>
+          ) : (
+            <ul className="mt-2.5 divide-y divide-divider border-l-4 border-ink-900 bg-card">
+              {depot.offers.map((offer) => {
+                const minPrice = offerMinPrice(offer);
+                return (
+                  <li key={offer.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedOffer(offer)}
+                      className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors duration-150 hover:bg-price-band"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="font-sans text-base font-bold text-text">
+                          {offer.product.brand.name} ·{" "}
+                          {formatCapacityKg(offer.product.capacity_kg, i18n.language)}
+                        </p>
+                        <p className="mt-0.5 text-sm text-text-secondary">
+                          {offer.operations.length > 0
+                            ? offer.operations
+                                .map((op) => t(`operation.${op.operation_type}`))
+                                .join(" · ")
+                            : t("store.noActiveOperations")}
+                        </p>
+                      </div>
 
-                    <div className="flex shrink-0 items-center gap-2">
-                      {minPrice !== null && (
-                        <span className="font-mono text-sm font-medium tabular text-text">
-                          {t("store.fromPrice", {
-                            price: formatFcfa(minPrice, i18n.language),
-                          })}
-                        </span>
-                      )}
-                      <IconChevronRight
-                        size={20}
-                        stroke={1.75}
-                        className="text-text-secondary"
-                        aria-hidden="true"
-                      />
-                    </div>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+                      <div className="flex shrink-0 items-center gap-2">
+                        {minPrice !== null && (
+                          <span className="font-mono text-sm font-medium tabular text-text-brand">
+                            {t("store.fromPrice", {
+                              price: formatFcfa(minPrice, i18n.language),
+                            })}
+                          </span>
+                        )}
+                        <IconChevronRight
+                          size={20}
+                          stroke={1.75}
+                          className="text-text-secondary"
+                          aria-hidden="true"
+                        />
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
 
-        <div className="mt-4">
-          <FreshnessStamp
-            updatedAt={freshnessSource}
-            serverNow={settings?.server_now}
-            suffix={t("store.availabilityDisclaimer")}
-          />
-        </div>
-      </section>
+          <div className="mt-4">
+            <FreshnessStamp
+              updatedAt={freshnessSource}
+              serverNow={settings?.server_now}
+              suffix={t("store.availabilityDisclaimer")}
+            />
+          </div>
+        </section>
+      </div>
 
-      {/* Barre d'action collée en bas (zone du pouce, un seul bouton rouge principal par écran) */}
-      <div className="fixed right-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 z-30 border-t border-divider bg-bg px-4 py-3 lg:bottom-0 lg:left-[4.5rem]">
+      {/* Barre d'action collée en bas (charbon) */}
+      <div className="fixed right-0 bottom-[calc(3.5rem+var(--safe-bottom))] left-0 z-30 bg-header-bg px-4 py-3 lg:bottom-0 lg:left-[4.5rem]">
         <div className="mx-auto max-w-xl space-y-2">
           {disabledReason && (
-            <p className="text-center text-sm font-medium text-text-secondary">
+            <p className="text-center text-xs font-medium text-text-inverse-muted">
               {disabledReason}
             </p>
           )}
@@ -321,7 +325,7 @@ export function DepotDetailPage() {
         </div>
       </div>
 
-      {/* Panneau détail des opérations et décomposition transparente des prix (DESIGN_SYSTEM §4.3 & §4.4) */}
+      {/* Panneau détail des opérations et décomposition transparente des prix */}
       <BottomSheet
         open={Boolean(selectedOffer)}
         title={
@@ -337,7 +341,7 @@ export function DepotDetailPage() {
         {selectedOffer && (
           <div className="space-y-4">
             {selectedOffer.notes && (
-              <p className="rounded-md bg-surface-muted p-3 text-sm text-text-secondary">
+              <p className="border-l-4 border-ink-900 bg-card px-3.5 py-2.5 text-sm text-text-secondary">
                 {selectedOffer.notes}
               </p>
             )}
@@ -345,17 +349,14 @@ export function DepotDetailPage() {
             {selectedOffer.operations.length === 0 ? (
               <p className="text-sm text-text-secondary">{t("store.noActiveOperations")}</p>
             ) : (
-              <div className="space-y-3">
+              <div className="divide-y divide-divider bg-card">
                 {selectedOffer.operations.map((op) => (
-                  <div
-                    key={op.operation_type}
-                    className="rounded-md border-card border-border-strong bg-white p-3"
-                  >
+                  <div key={op.operation_type} className="p-4">
                     <div className="flex items-baseline justify-between gap-2">
                       <h3 className="font-sans text-base font-bold text-text">
                         {t(`operation.${op.operation_type}`)}
                       </h3>
-                      <span className="font-mono text-lg font-medium tabular text-text">
+                      <span className="font-mono text-lg font-medium tabular text-text-brand">
                         {formatFcfa(op.total_unit_price, i18n.language)}
                       </span>
                     </div>
@@ -363,9 +364,8 @@ export function DepotDetailPage() {
                       {t(`operation.desc.${op.operation_type}`)}
                     </p>
 
-                    {/* Décomposition transparente pour Première bouteille (jamais fusionnée, §4.4) */}
                     {op.operation_type === "FIRST_ACQUISITION" && (
-                      <dl className="mt-2.5 space-y-1 border-t border-divider pt-2 text-sm">
+                      <dl className="mt-2.5 space-y-1 bg-price-band px-3 py-2 text-sm">
                         <div className="flex justify-between">
                           <dt className="text-text-secondary">{t("operation.priceLines.gas")}</dt>
                           <dd className="font-mono tabular text-text">
@@ -395,10 +395,9 @@ export function DepotDetailPage() {
                       </dl>
                     )}
 
-                    {/* Marques vides acceptées en échange (DESIGN_SYSTEM §4.2 & §4.3) */}
                     {op.operation_type === "EXCHANGE" && (
-                      <div className="mt-2.5 border-t border-divider pt-2">
-                        <p className="text-xs font-bold text-text-secondary">
+                      <div className="mt-2.5 pt-1">
+                        <p className="text-xs font-bold uppercase tracking-[0.3px] text-text-secondary">
                           {t("store.exchangeAcceptedBrands")}
                         </p>
                         {selectedOffer.exchange_brands.length > 0 ? (
@@ -406,7 +405,7 @@ export function DepotDetailPage() {
                             {selectedOffer.exchange_brands.map((brand) => (
                               <span
                                 key={brand.id}
-                                className="rounded-sm border-hair border-border bg-surface-muted px-2 py-0.5 text-xs font-bold text-text"
+                                className="rounded-sm bg-price-band px-2.5 py-0.5 text-xs font-bold text-text"
                               >
                                 {brand.name}
                               </span>
@@ -424,7 +423,7 @@ export function DepotDetailPage() {
               </div>
             )}
 
-            <p className="rounded-md bg-surface-muted p-3 text-sm text-text-secondary">
+            <p className="bg-surface-muted p-3 text-sm text-text-secondary">
               {t("store.orderingComingSoon")}
             </p>
 
