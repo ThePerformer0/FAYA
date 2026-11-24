@@ -8,12 +8,15 @@ import {
   IconAlertTriangle,
   IconCheck,
   IconClock,
+  IconEye,
+  IconEyeOff,
   IconWifiOff,
   IconX,
 } from "@tabler/icons-react";
 import {
   forwardRef,
   useEffect,
+  useState,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
   type ReactNode,
@@ -93,9 +96,13 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { id, label, hint, error, className = "", ...rest },
+  { id, label, hint, error, type, className = "", ...rest },
   ref,
 ) {
+  const { t } = useTranslation();
+  const [showPassword, setShowPassword] = useState(false);
+  const isPassword = type === "password";
+  const resolvedType = isPassword ? (showPassword ? "text" : "password") : type;
   const errorId = error ? `${id}-error` : undefined;
   const hintId = hint && !error ? `${id}-hint` : undefined;
 
@@ -104,18 +111,38 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
       <label htmlFor={id} className="block text-sm font-bold uppercase tracking-[0.3px] text-text-secondary">
         {label}
       </label>
-      <input
-        ref={ref}
-        id={id}
-        aria-invalid={error ? "true" : "false"}
-        aria-describedby={errorId ?? hintId}
-        className={`h-12 w-full rounded-t-sm rounded-b-none bg-card px-3.5 text-base text-text placeholder:text-text-muted border-b-2 focus:outline-none transition-colors duration-150 ${
-          error
-            ? "border-danger bg-danger-bg/40"
-            : "border-ink-900/20 focus:border-action"
-        } ${className}`}
-        {...rest}
-      />
+      <div className="relative">
+        <input
+          ref={ref}
+          id={id}
+          type={resolvedType}
+          aria-invalid={error ? "true" : "false"}
+          aria-describedby={errorId ?? hintId}
+          className={`h-12 w-full rounded-t-sm rounded-b-none bg-card px-3.5 text-base text-text placeholder:text-text-muted border-b-2 focus:outline-none transition-colors duration-150 ${
+            isPassword ? "pr-12" : ""
+          } ${
+            error
+              ? "border-danger bg-danger-bg/40"
+              : "border-ink-900/20 focus:border-action"
+          } ${className}`}
+          {...rest}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label={showPassword ? t("auth.fields.hidePassword") : t("auth.fields.showPassword")}
+            aria-pressed={showPassword}
+            className="absolute top-0 right-0 inline-flex h-12 w-12 items-center justify-center text-text-secondary hover:text-text"
+          >
+            {showPassword ? (
+              <IconEyeOff size={20} stroke={1.75} aria-hidden="true" />
+            ) : (
+              <IconEye size={20} stroke={1.75} aria-hidden="true" />
+            )}
+          </button>
+        )}
+      </div>
       {error ? (
         <p id={errorId} role="alert" className="flex items-start gap-1.5 text-sm font-medium text-danger">
           <IconAlertTriangle size={18} stroke={1.75} className="mt-0.5 shrink-0" aria-hidden="true" />

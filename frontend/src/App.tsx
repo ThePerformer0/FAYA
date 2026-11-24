@@ -1,5 +1,4 @@
-import { useTranslation } from "react-i18next";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import { AuthProvider } from "./features/auth/AuthContext";
 import { LoginPage } from "./features/auth/LoginPage";
@@ -9,28 +8,13 @@ import { RegisterPage } from "./features/auth/RegisterPage";
 import { DepotDetailPage } from "./features/depots/DepotDetailPage";
 import { DepotsPage } from "./features/depots/DepotsPage";
 import { OrdersPage } from "./features/orders/OrdersPage";
+import { PortalDepotInfoPage } from "./features/portal/PortalDepotInfoPage";
+import { PortalOffersPage } from "./features/portal/PortalOffersPage";
+import { PortalOrdersPlaceholderPage } from "./features/portal/PortalOrdersPlaceholderPage";
+import { PortalShell } from "./features/portal/PortalShell";
+import { PortalStocksPage } from "./features/portal/PortalStocksPage";
 import { Layout } from "./shared/Layout";
 import { NetworkProvider } from "./shared/NetworkContext";
-
-function DepotPortalPlaceholder() {
-  const { t } = useTranslation();
-  return (
-    <div className="flex flex-1 flex-col">
-      <div className="bg-header-bg px-4 pt-3 pb-5 text-text-inverse">
-        <div className="mx-auto max-w-xl">
-          <h1 className="font-display text-2xl font-bold uppercase tracking-[0.5px]">
-            {t("depotPortal.title")}
-          </h1>
-        </div>
-      </div>
-      <div className="mx-auto w-full max-w-xl px-4 py-6">
-        <div className="border-l-4 border-ink-900 bg-card p-5">
-          <p className="text-base text-text-secondary">{t("depotPortal.body")}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function App() {
   return (
@@ -50,7 +34,13 @@ export function App() {
               </Route>
 
               <Route element={<ProtectedRoute allowedRoles={["DEPOT_MANAGER"]} />}>
-                <Route path="/depot" element={<DepotPortalPlaceholder />} />
+                <Route path="/depot" element={<PortalShell />}>
+                  <Route index element={<Navigate to="stocks" replace />} />
+                  <Route path="stocks" element={<PortalStocksPage />} />
+                  <Route path="offers" element={<PortalOffersPage />} />
+                  <Route path="info" element={<PortalDepotInfoPage />} />
+                  <Route path="orders" element={<PortalOrdersPlaceholderPage />} />
+                </Route>
               </Route>
             </Route>
           </Routes>

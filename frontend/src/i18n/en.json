@@ -69,7 +69,21 @@
     "chooseOperationTitle": "Prices and options",
     "orderingComingSoon": "Online reservation arrives in the next milestone. You can check prices and call the store directly.",
     "notFoundTitle": "Store not found",
-    "notFoundBody": "This store is no longer active or the link is invalid."
+    "notFoundBody": "This store is no longer active or the link is invalid.",
+    "stock": {
+      "fullAvailable_one": "{{count}} full available",
+      "fullAvailable_other": "{{count}} full available",
+      "newAvailable_one": "{{count}} new available",
+      "newAvailable_other": "{{count}} new available",
+      "fullAndNew": "{{full}} full · {{newCount}} new",
+      "noFullBottles": "No full bottles left",
+      "noFullButNew_one": "No full · {{count}} new",
+      "noFullButNew_other": "No full · {{count}} new",
+      "outOfStock": "Out of stock",
+      "fullLabel": "Full bottles available",
+      "newLabel": "New bottles available",
+      "unavailableForOperation": "Currently out of stock for this option."
+    }
   },
   "operation": {
     "REFILL": "Refill",
@@ -157,7 +171,9 @@
       "phone": "Phone (international format)",
       "phoneHint": "Cameroon example: +237699123456",
       "password": "Password",
-      "passwordHint": "At least 8 characters."
+      "passwordHint": "At least 8 characters.",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "validation": {
       "fullNameRequired": "Enter your full name.",
@@ -173,7 +189,154 @@
     }
   },
   "depotPortal": {
-    "title": "Store manager portal",
-    "body": "Protected access verified. Stock, offers and order queue arrive in the next milestones."
+    "title": "Store Portal",
+    "subtitle": "Manage your stock, prices and opening hours live.",
+    "tabs": {
+      "stocks": "Stock",
+      "offers": "Offers",
+      "info": "Store",
+      "orders": "Orders"
+    },
+    "status": {
+      "PENDING": "Pending approval",
+      "ACTIVE": "Active store",
+      "SUSPENDED": "Suspended store",
+      "DISABLED": "Disabled store"
+    },
+    "banners": {
+      "pending": "Your store is awaiting administrator approval. You can already set up your details, offers and stock.",
+      "readOnly": "Your store is read only ({{status}}). You can inspect stock and history, but changes are disabled."
+    },
+    "stocks": {
+      "subviewLevels": "Stock levels",
+      "subviewMovements": "Movement history",
+      "restockAction": "Restock",
+      "adjustAction": "Adjust",
+      "scrapAction": "Scrap",
+      "allCategories": "All",
+      "allTypes": "All types",
+      "physical": "Physical",
+      "reserved": "Reserved",
+      "available": "Available",
+      "notSellable": "Not sellable",
+      "emptyTitle": "No stock recorded yet",
+      "emptyBody": "Record your first restock to display live bottle availability to customers.",
+      "emptyMovementsTitle": "No movements recorded",
+      "emptyMovementsBody": "Every restock, inventory correction or scrap is permanently logged here.",
+      "categories": {
+        "FULL": "Full",
+        "EMPTY": "Empty",
+        "NEW": "New",
+        "DEPOSIT": "Deposit"
+      },
+      "movementTypes": {
+        "RESTOCK": "Restock",
+        "MANUAL_ADJUSTMENT": "Manual adjustment",
+        "INVENTORY_CORRECTION": "Inventory correction",
+        "SCRAP": "Scrap",
+        "RESERVATION": "Reservation",
+        "RELEASE": "Release",
+        "PICKUP_OUT": "Customer pickup",
+        "EMPTY_RETURN": "Empty return"
+      },
+      "restockTitle": "Restock inventory",
+      "adjustTitle": "Adjust stock level",
+      "scrapTitle": "Record damaged or scrapped bottles",
+      "fields": {
+        "product": "Product",
+        "selectProduct": "Select a catalog product",
+        "category": "Category",
+        "quantity": "Quantity to add",
+        "scrapQuantity": "Quantity to scrap",
+        "newPhysicalQuantity": "New actual physical count",
+        "movementType": "Adjustment type",
+        "reasonOptional": "Reason or delivery note reference (optional)",
+        "reasonRequired": "Reason (required)",
+        "reasonPlaceholderRestock": "e.g. Morning supplier delivery",
+        "reasonPlaceholderAdjust": "e.g. End of day physical count",
+        "reasonPlaceholderScrap": "e.g. Damaged valve or dented cylinder"
+      },
+      "currentSummary": "Current: {{physical}} physical · {{reserved}} reserved",
+      "conflictReload": "Refresh stock levels",
+      "savedRestock": "Restock recorded.",
+      "savedAdjust": "Inventory adjustment recorded.",
+      "savedScrap": "Scrap recorded.",
+      "systemActor": "System",
+      "previousPage": "Previous",
+      "nextPage": "Next",
+      "pageStatus": "Page {{page}} · {{count}} results"
+    },
+    "offers": {
+      "subviewOffers": "Store offers",
+      "subviewProposals": "Catalog proposals",
+      "addOffer": "Add offer",
+      "editOffer": "Edit offer",
+      "createOfferTitle": "New product offer",
+      "deleteOffer": "Delete",
+      "confirmDelete": "Confirm deletion",
+      "cancel": "Cancel",
+      "activeBadge": "Active",
+      "hiddenBadge": "Hidden",
+      "activate": "Activate",
+      "hide": "Hide",
+      "emptyTitle": "No offers configured",
+      "emptyBody": "Add bottles from the catalog with your refill, exchange or first bottle prices.",
+      "allProductsUsed": "All published catalog products are already listed in your offers. You can propose a new product.",
+      "fields": {
+        "product": "Catalog product",
+        "isActive": "Visible publicly on Faya",
+        "notes": "Customer notes (optional)",
+        "notesPlaceholder": "e.g. Deposit refundable with receipt",
+        "operations": "Options and prices (FCFA)",
+        "gasPrice": "Gas price (FCFA)",
+        "bottlePrice": "Bottle price (FCFA)",
+        "depositAmount": "Deposit amount (FCFA)",
+        "totalUnitPrice": "Total shown to customer",
+        "exchangeBrands": "Empty bottle brands accepted for exchange",
+        "exchangeHint": "Select other brands accepted in exchange for this bottle."
+      },
+      "saved": "Offer saved.",
+      "deleted": "Offer deleted.",
+      "addProposal": "Propose product",
+      "proposalTitle": "Propose a catalog product",
+      "proposalsEmptyTitle": "No proposals submitted",
+      "proposalsEmptyBody": "Missing a brand or cylinder size in the central catalog? Submit a proposal for admin review.",
+      "proposalStatus": {
+        "PENDING": "Pending",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected"
+      },
+      "proposalFields": {
+        "brandName": "Brand name",
+        "name": "Product name",
+        "capacityKg": "Capacity (kg)",
+        "productType": "Gas type",
+        "description": "Description (optional)"
+      },
+      "proposalSaved": "Proposal submitted for review."
+    },
+    "info": {
+      "sectionIdentity": "Identity and contact",
+      "sectionHours": "Opening hours (Africa/Douala)",
+      "sectionLocation": "Address and GPS coordinates",
+      "useCurrentLocation": "Use my GPS location",
+      "saved": "Store details saved.",
+      "fields": {
+        "name": "Store name",
+        "description": "Description",
+        "phone": "Phone (international format)",
+        "openingTime": "Opening time",
+        "closingTime": "Closing time",
+        "address": "Full address",
+        "neighborhood": "Neighborhood",
+        "latitude": "Latitude",
+        "longitude": "Longitude"
+      }
+    },
+    "orders": {
+      "title": "Order queue",
+      "body": "Receiving and confirming customer reservations (in-store pickup, empty bottle return and payment) will arrive in Milestone 3.",
+      "goStocks": "Manage my stock"
+    }
   }
 }

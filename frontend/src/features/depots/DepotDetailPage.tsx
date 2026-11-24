@@ -138,7 +138,12 @@ export function DepotDetailPage() {
   const googleMapsUrl = userCoords
     ? `https://www.google.com/maps/dir/?api=1&origin=${userCoords.lat},${userCoords.lng}&destination=${depot.latitude},${depot.longitude}`
     : `https://www.google.com/maps/dir/?api=1&destination=${depot.latitude},${depot.longitude}`;
-  const freshnessSource = depot.offers[0]?.updated_at ?? depot.updated_at;
+  const latestStockIso = depot.offers.reduce<string | null>((latest, offer) => {
+    if (!offer.stock_updated_at) return latest;
+    if (!latest || offer.stock_updated_at > latest) return offer.stock_updated_at;
+    return latest;
+  }, null);
+  const freshnessSource = latestStockIso ?? depot.offers[0]?.updated_at ?? depot.updated_at;
 
   const canChoose = isOnline && depot.can_order && depot.offers.length > 0;
   let disabledReason: string | null = null;
@@ -327,6 +332,17 @@ export function DepotDetailPage() {
             <ul className="mt-2.5 divide-y divide-divider border-l-4 border-ink-900 bg-card">
               {depot.offers.map((offer) => {
                 const minPrice = offerMinPrice(offer);
+                const fullQty = offer.available_full_quantity;
+                const newQty = offer.available_new_quantity;
+                const stockLabel =
+                  fullQty > 0 && newQty > 0
+                    ? t("store.stock.fullAndNew", { full: fullQty, newCount: newQty })
+                    : fullQty > 0
+                      ? t("store.stock.fullAvailable", { count: fullQty })
+                      : newQty > 0
+                        ? t("store.stock.noFullButNew", { count: newQty })
+                        : t("store.stock.outOfStock");
+                const isLowOrOut = fullQty === 0;
                 return (
                   <li key={offer.id}>
                     <button
@@ -345,6 +361,13 @@ export function DepotDetailPage() {
                                 .map((op) => t(`operation.${op.operation_type}`))
                                 .join(" · ")
                             : t("store.noActiveOperations")}
+                        </p>
+                        <p
+                          className={`mt-1 font-mono text-xs font-medium tabular ${
+                            isLowOrOut ? "text-soon" : "text-text-secondary"
+                          }`}
+                        >
+                          {stockLabel}
                         </p>
                       </div>
 
@@ -418,6 +441,41 @@ export function DepotDetailPage() {
       >
         {selectedOffer && (
           <div className="space-y-4">
+            {/* Disponibilité réelle (pleines / neuves uniquement, jamais vides) */}
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="bg-card px-3.5 py-2.5">
+                <p className="text-xs font-bold uppercase tracking-[0.3px] text-text-secondary">
+                  {t("store.stock.fullLabel")}
+                </p>
+                <p
+                  className={`mt-1 font-mono text-xl font-medium tabular ${
+                    selectedOffer.available_full_quantity > 0 ? "text-text" : "text-soon"
+                  }`}
+                >
+                  {selectedOffer.available_full_quantity}
+                </p>
+              </div>
+              <div className="bg-card px-3.5 py-2.5">
+                <p className="text-xs font-bold uppercase tracking-[0.3px] text-text-secondary">
+                  {t("store.stock.newLabel")}
+                </p>
+                <p
+                  className={`mt-1 font-mono text-xl font-medium tabular ${
+                    selectedOffer.available_new_quantity > 0 ? "text-text" : "text-text-secondary"
+                  }`}
+                >
+                  {selectedOffer.available_new_quantity}
+                </p>
+              </div>
+            </div>
+
+            {selectedOffer.stock_updated_at && (
+              <FreshnessStamp
+                updatedAt={selectedOffer.stock_updated_at}
+                serverNow={settings?.server_now}
+              />
+            )}
+
             {selectedOffer.notes && (
               <p className="border-l-4 border-ink-900 bg-card px-3.5 py-2.5 text-sm text-text-secondary">
                 {selectedOffer.notes}
@@ -428,7 +486,13 @@ export function DepotDetailPage() {
               <p className="text-sm text-text-secondary">{t("store.noActiveOperations")}</p>
             ) : (
               <div className="divide-y divide-divider bg-card">
-                {selectedOffer.operations.map((op) => (
+                {selectedOffer.operations.map((op) => {
+                  const opOutOfStock =
+                    op.operation_type === "FIRST_ACQUISITION"
+                      ? selectedOffer.available_new_quantity === 0 &&
+                        selectedOffer.available_full_quantity === 0
+                      : selectedOffer.available_full_quantity === 0;
+                  return (
                   <div key={op.operation_type} className="p-4">
                     <div className="flex items-baseline justify-between gap-2">
                       <h3 className="font-sans text-base font-bold text-text">
@@ -441,6 +505,11 @@ export function DepotDetailPage() {
                     <p className="mt-1 text-sm text-text-secondary">
                       {t(`operation.desc.${op.operation_type}`)}
                     </p>
+                    {opOutOfStock && (
+                      <p className="mt-1.5 text-xs font-bold text-soon">
+                        {t("store.stock.unavailableForOperation")}
+                      </p>
+                    )}
 
                     {op.operation_type === "FIRST_ACQUISITION" && (
                       <dl className="mt-2.5 space-y-1 bg-price-band px-3 py-2 text-sm">
@@ -497,7 +566,8 @@ export function DepotDetailPage() {
                       </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 

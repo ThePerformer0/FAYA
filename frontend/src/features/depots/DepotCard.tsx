@@ -61,7 +61,35 @@ export function DepotCard({
   const primaryOffer = pickPrimaryOffer(depot.offers, activeBrandId, activeCapacityKg);
 
   const visibleOperations = primaryOffer ? primaryOffer.operations.slice(0, 2) : [];
-  const freshnessSource = primaryOffer?.updated_at ?? depot.updated_at;
+  const freshnessSource =
+    primaryOffer?.stock_updated_at ?? primaryOffer?.updated_at ?? depot.updated_at;
+
+  const fullQty = primaryOffer?.available_full_quantity ?? 0;
+  const newQty = primaryOffer?.available_new_quantity ?? 0;
+  let stockBadge: { label: string; isOut: boolean } | null = null;
+  if (primaryOffer) {
+    if (fullQty > 0 && newQty > 0) {
+      stockBadge = {
+        label: t("store.stock.fullAndNew", { full: fullQty, newCount: newQty }),
+        isOut: false,
+      };
+    } else if (fullQty > 0) {
+      stockBadge = {
+        label: t("store.stock.fullAvailable", { count: fullQty }),
+        isOut: false,
+      };
+    } else if (newQty > 0) {
+      stockBadge = {
+        label: t("store.stock.noFullButNew", { count: newQty }),
+        isOut: true,
+      };
+    } else {
+      stockBadge = {
+        label: t("store.stock.outOfStock"),
+        isOut: true,
+      };
+    }
+  }
 
   // Barre architecturale gauche 4 px (remplace les bordures 1px génériques tout autour)
   const accentBarCls = selected
@@ -116,6 +144,19 @@ export function DepotCard({
             closingTime={depot.closing_time}
             reopensAt={depot.reopens_at}
           />
+          {stockBadge && (
+            <span
+              className={`inline-flex min-h-6 items-center rounded-sm px-2 py-0.5 font-mono text-xs font-medium tabular ${
+                stockBadge.isOut
+                  ? "bg-soon-bg text-soon"
+                  : isClosed
+                    ? "bg-card/70 text-text-secondary"
+                    : "bg-price-band text-text"
+              }`}
+            >
+              {stockBadge.label}
+            </span>
+          )}
         </div>
       </div>
 

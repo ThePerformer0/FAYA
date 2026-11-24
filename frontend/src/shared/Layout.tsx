@@ -51,6 +51,7 @@ export function Layout() {
             to: "/depot",
             label: t("nav.depotPortal"),
             icon: IconBuildingStore,
+            matchPrefix: "/depot",
           },
         ]
       : []),

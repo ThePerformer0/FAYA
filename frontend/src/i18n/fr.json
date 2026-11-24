@@ -69,7 +69,21 @@
     "chooseOperationTitle": "Tarifs et opérations",
     "orderingComingSoon": "La réservation en ligne arrive au prochain jalon. Vous pouvez consulter les tarifs et appeler le dépôt directement.",
     "notFoundTitle": "Dépôt introuvable",
-    "notFoundBody": "Ce dépôt n'est plus actif ou l'adresse est incorrecte."
+    "notFoundBody": "Ce dépôt n'est plus actif ou l'adresse est incorrecte.",
+    "stock": {
+      "fullAvailable_one": "{{count}} pleine dispo",
+      "fullAvailable_other": "{{count}} pleines dispo",
+      "newAvailable_one": "{{count}} neuve dispo",
+      "newAvailable_other": "{{count}} neuves dispo",
+      "fullAndNew": "{{full}} pleines · {{newCount}} neuves",
+      "noFullBottles": "Plus de bouteille pleine",
+      "noFullButNew_one": "Plus de pleine · {{count}} neuve",
+      "noFullButNew_other": "Plus de pleine · {{count}} neuves",
+      "outOfStock": "Rupture de stock",
+      "fullLabel": "Bouteilles pleines dispo",
+      "newLabel": "Bouteilles neuves dispo",
+      "unavailableForOperation": "Stock actuellement épuisé pour cette opération."
+    }
   },
   "operation": {
     "REFILL": "Recharge",
@@ -157,7 +171,9 @@
       "phone": "Téléphone (format international)",
       "phoneHint": "Exemple Cameroun : +237699123456",
       "password": "Mot de passe",
-      "passwordHint": "8 caractères minimum."
+      "passwordHint": "8 caractères minimum.",
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe"
     },
     "validation": {
       "fullNameRequired": "Indiquez votre nom complet.",
@@ -173,7 +189,154 @@
     }
   },
   "depotPortal": {
-    "title": "Espace Responsable de dépôt",
-    "body": "Accès protégé validé. La gestion du stock, des offres et des commandes arrive aux prochains jalons."
+    "title": "Espace Dépôt",
+    "subtitle": "Gérez vos stocks, vos tarifs et vos horaires en direct.",
+    "tabs": {
+      "stocks": "Stock",
+      "offers": "Offres",
+      "info": "Dépôt",
+      "orders": "Commandes"
+    },
+    "status": {
+      "PENDING": "En attente de validation",
+      "ACTIVE": "Dépôt actif",
+      "SUSPENDED": "Dépôt suspendu",
+      "DISABLED": "Dépôt désactivé"
+    },
+    "banners": {
+      "pending": "Votre dépôt est en attente de validation administrateur. Vous pouvez déjà préparer vos informations, offres et stocks.",
+      "readOnly": "Votre dépôt est en lecture seule ({{status}}). Vous pouvez consulter vos stocks et votre historique, mais les modifications sont bloquées."
+    },
+    "stocks": {
+      "subviewLevels": "Niveaux de stock",
+      "subviewMovements": "Historique mouvements",
+      "restockAction": "Approvisionner",
+      "adjustAction": "Corriger",
+      "scrapAction": "Rebut",
+      "allCategories": "Toutes",
+      "allTypes": "Tous les types",
+      "physical": "Physique",
+      "reserved": "Réservé",
+      "available": "Disponible",
+      "notSellable": "Non vendable",
+      "emptyTitle": "Aucun stock enregistré",
+      "emptyBody": "Enregistrez votre premier approvisionnement pour afficher la disponibilité réelle de vos bouteilles.",
+      "emptyMovementsTitle": "Aucun mouvement enregistré",
+      "emptyMovementsBody": "Chaque entrée, correction d'inventaire ou mise au rebut apparaît ici de façon permanente.",
+      "categories": {
+        "FULL": "Pleine",
+        "EMPTY": "Vide",
+        "NEW": "Neuve",
+        "DEPOSIT": "Sous consigne"
+      },
+      "movementTypes": {
+        "RESTOCK": "Approvisionnement",
+        "MANUAL_ADJUSTMENT": "Ajustement manuel",
+        "INVENTORY_CORRECTION": "Correction d'inventaire",
+        "SCRAP": "Mise au rebut",
+        "RESERVATION": "Réservation",
+        "RELEASE": "Libération",
+        "PICKUP_OUT": "Remise client",
+        "EMPTY_RETURN": "Retour vide"
+      },
+      "restockTitle": "Approvisionner le stock",
+      "adjustTitle": "Corriger le stock",
+      "scrapTitle": "Déclarer une mise au rebut",
+      "fields": {
+        "product": "Produit",
+        "selectProduct": "Choisir un produit du catalogue",
+        "category": "Catégorie",
+        "quantity": "Quantité à ajouter",
+        "scrapQuantity": "Quantité mise au rebut",
+        "newPhysicalQuantity": "Nouveau stock physique réel",
+        "movementType": "Type de correction",
+        "reasonOptional": "Motif ou référence bon de livraison (optionnel)",
+        "reasonRequired": "Motif obligatoire",
+        "reasonPlaceholderRestock": "Ex. Livraison fournisseur du matin",
+        "reasonPlaceholderAdjust": "Ex. Comptage physique fin de journée",
+        "reasonPlaceholderScrap": "Ex. Valve défectueuse ou bouteille cabossée"
+      },
+      "currentSummary": "Actuel : {{physical}} physique · {{reserved}} réservé",
+      "conflictReload": "Actualiser les stocks",
+      "savedRestock": "Approvisionnement enregistré.",
+      "savedAdjust": "Correction d'inventaire enregistrée.",
+      "savedScrap": "Mise au rebut enregistrée.",
+      "systemActor": "Système",
+      "previousPage": "Précédent",
+      "nextPage": "Suivant",
+      "pageStatus": "Page {{page}} · {{count}} résultats"
+    },
+    "offers": {
+      "subviewOffers": "Offres du dépôt",
+      "subviewProposals": "Propositions catalogue",
+      "addOffer": "Ajouter une offre",
+      "editOffer": "Modifier l'offre",
+      "createOfferTitle": "Nouvelle offre produit",
+      "deleteOffer": "Supprimer",
+      "confirmDelete": "Confirmer la suppression",
+      "cancel": "Annuler",
+      "activeBadge": "Active",
+      "hiddenBadge": "Masquée",
+      "activate": "Activer",
+      "hide": "Masquer",
+      "emptyTitle": "Aucune offre configurée",
+      "emptyBody": "Ajoutez vos bouteilles du catalogue avec leurs tarifs de recharge, échange ou première acquisition.",
+      "allProductsUsed": "Tous les produits publiés du catalogue sont déjà dans vos offres. Vous pouvez proposer un nouveau produit.",
+      "fields": {
+        "product": "Produit du catalogue",
+        "isActive": "Visible publiquement sur Faya",
+        "notes": "Notes pour les clients (optionnel)",
+        "notesPlaceholder": "Ex. Consigne remboursable sur présentation du reçu",
+        "operations": "Opérations et tarifs (FCFA)",
+        "gasPrice": "Prix du gaz (FCFA)",
+        "bottlePrice": "Prix de la bouteille (FCFA)",
+        "depositAmount": "Montant de la consigne (FCFA)",
+        "totalUnitPrice": "Total affiché au client",
+        "exchangeBrands": "Marques de bouteilles vides acceptées en échange",
+        "exchangeHint": "Sélectionnez les autres marques que vous acceptez contre ce produit."
+      },
+      "saved": "Offre enregistrée.",
+      "deleted": "Offre supprimée.",
+      "addProposal": "Proposer un produit",
+      "proposalTitle": "Proposer un produit au catalogue",
+      "proposalsEmptyTitle": "Aucune proposition soumise",
+      "proposalsEmptyBody": "Une marque ou une capacité manque au catalogue central ? Soumettez une proposition à l'administrateur.",
+      "proposalStatus": {
+        "PENDING": "En attente",
+        "APPROVED": "Approuvée",
+        "REJECTED": "Refusée"
+      },
+      "proposalFields": {
+        "brandName": "Nom de la marque",
+        "name": "Désignation du produit",
+        "capacityKg": "Capacité (kg)",
+        "productType": "Type de gaz",
+        "description": "Description (optionnel)"
+      },
+      "proposalSaved": "Proposition soumise pour validation."
+    },
+    "info": {
+      "sectionIdentity": "Identité et contact",
+      "sectionHours": "Horaires d'ouverture (Africa/Douala)",
+      "sectionLocation": "Adresse et coordonnées GPS",
+      "useCurrentLocation": "Utiliser ma position GPS",
+      "saved": "Informations du dépôt enregistrées.",
+      "fields": {
+        "name": "Nom du dépôt",
+        "description": "Description",
+        "phone": "Téléphone (format international)",
+        "openingTime": "Heure d'ouverture",
+        "closingTime": "Heure de fermeture",
+        "address": "Adresse complète",
+        "neighborhood": "Quartier",
+        "latitude": "Latitude",
+        "longitude": "Longitude"
+      }
+    },
+    "orders": {
+      "title": "File des commandes",
+      "body": "La réception et la confirmation des commandes clients (retrait au dépôt, retour bouteille vide et encaissement) seront activées au Jalon 3.",
+      "goStocks": "Gérer mes stocks"
+    }
   }
 }
