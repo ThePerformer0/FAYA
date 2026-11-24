@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 
-from apps.inventory.models import DepotStock, StockMovement
+from apps.inventory.models import DepotStock, StockMovement, StockReservation
 
 
 @admin.register(DepotStock)
@@ -59,6 +59,31 @@ class StockMovementAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(StockReservation)
+class StockReservationAdmin(admin.ModelAdmin):
+    list_display = ("order", "stock", "quantity", "status", "expires_at", "created_at")
+    list_filter = ("status", "stock__category")
+    search_fields = ("order__reference", "stock__depot__name", "stock__product__name")
+    readonly_fields = (
+        "id",
+        "order",
+        "stock",
+        "quantity",
+        "status",
+        "expires_at",
+        "released_at",
+        "consumed_at",
+        "created_at",
+        "updated_at",
+    )
+
+    def has_add_permission(self, request):
         return False
 
     def has_delete_permission(self, request, obj=None):

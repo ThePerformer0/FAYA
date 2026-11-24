@@ -28,6 +28,12 @@ class StockMovementType(models.TextChoices):
     EMPTY_RETURN = "EMPTY_RETURN", "Retour bouteille vide"
 
 
+class StockReservationStatus(models.TextChoices):
+    ACTIVE = "ACTIVE", "Active"
+    RELEASED = "RELEASED", "Libérée"
+    CONSUMED = "CONSUMED", "Consommée"
+
+
 class DepotStock(TimeStampedUUIDModel):
     """Stock d'un dépôt pour un produit et une catégorie donnée (pleines, vides, neuves, consigne)."""
 
@@ -232,3 +238,68 @@ class StockMovement(models.Model):
         raise PermissionError(
             "Le journal des mouvements de stock est immuable : suppression interdite."
         )
+
+
+class StockReservation(TimeStampedUUIDModel):
+    """Réservation temporaire de stock rattachée à une commande active (CDC §6.3)."""
+
+    stock = models.ForeignKey(
+        DepotStock,
+        on_delete=models.PROTECT,
+        related_name="reservations",
+    )
+    order = models.ForeignKey(
+        "orders.Order",
+        on_delete=models.PROTECT,
+        related_name="stock_reservations",
+    )
+    quantity = models.PositiveIntegerField()
+    status = models.CharField(
+        max_length=20,
+        choices=StockReservationStatus.choices,
+        default=StockReservationStatus.ACTIVE,
+        db_index=True,
+    )
+    expires_at = models.DateTimeField(db_index=True)
+    released_at = models.DateTimeField(null=True, blank=True)
+    consumed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Réservation de stock"
+        verbose_name_plural = "Réservations de stock"
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["order", "stock"],
+                name="inventory_reservation_unique_order_stock",
+            ),
+            models.CheckConstraint(
+                condition=Q(quantity__gt=0),
+                name="inventory_reservation_quantity_gt_0",
+            ),
+            models.CheckConstraint(
+                condition=~Q(status=StockReservationStatus.RELEASED) | Q(released_at__isnull=False),
+                name="inventory_reservation_released_at_required",
+            ),
+            models.CheckConstraint(
+                condition=~Q(status=StockReservationStatus.CONSUMED) | Q(consumed_at__isnull=False),
+                name="inventory_reservation_consumed_at_required",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["order", "status"]),
+            models.Index(fields=["status", "expires_at"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"Rés. {self.quantity}× {self.stock.product} [{self.status}]"
+
+    def clean(self) -> None:
+        super().clean()
+        errors: dict[str, str] = {}
+        if self.quantity is None or self.quantity <= 0:
+            errors["quantity"] = "La quantité réservée doit être strictement positive."
+        if self.stock_id and self.stock.category == StockCategory.EMPTY:
+            errors["stock"] = "Une bouteille vide ne peut jamais être réservée à la vente."
+        if errors:
+            raise ValidationError(errors)
