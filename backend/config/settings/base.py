@@ -83,6 +83,7 @@ LOCAL_APPS = [
     "apps.catalog",
     "apps.depots",
     "apps.inventory",
+    "apps.orders",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -214,4 +215,10 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
     "SCHEMA_PATH_PREFIX": r"/api/v[0-9]",
+    "ENUM_NAME_OVERRIDES": {
+        "OrderStatusEnum": "apps.orders.models.OrderStatus",
+        "PaymentStatusEnum": "apps.orders.models.PaymentStatus",
+        "ManagedDepotStatusEnum": "apps.depots.models.DepotStatus",
+        "ManagedProductProposalStatusEnum": "apps.catalog.models.ProductProposalStatus",
+    },
 }

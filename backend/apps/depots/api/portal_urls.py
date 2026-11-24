@@ -23,4 +23,5 @@ urlpatterns = [
         name="depot-portal-proposals",
     ),
     path("", include("apps.inventory.api.urls")),
+    path("", include("apps.orders.api.portal_urls")),
 ]

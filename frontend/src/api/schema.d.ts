@@ -218,6 +218,126 @@ export interface paths {
         patch: operations["depot_offers_partial_update"];
         trace?: never;
     };
+    "/api/v1/depot/orders/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lister les commandes reçues par son dépôt
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        get: operations["depot_orders_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depot/orders/{order_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consulter le détail d'une commande de son dépôt
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        get: operations["depot_orders_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depot/orders/{order_id}/accept/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Accepter une commande EN_ATTENTE (calcule l'échéance de retrait)
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        post: operations["depot_orders_accept_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depot/orders/{order_id}/cancel-non-conformity/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Annuler une commande CONFIRMEE pour bouteille vide non conforme
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        post: operations["depot_orders_cancel_non_conformity_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depot/orders/{order_id}/pickup/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Valider le retrait au comptoir, le paiement et le retour bouteille vide
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        post: operations["depot_orders_pickup_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/depot/orders/{order_id}/refuse/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refuser une commande EN_ATTENTE avec motif obligatoire
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        post: operations["depot_orders_refuse_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/depot/proposals/": {
         parameters: {
             query?: never;
@@ -393,6 +513,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/orders/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lister les commandes du client connecté
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        get: operations["orders_list"];
+        put?: never;
+        /**
+         * Créer une commande de retrait au dépôt avec réservation atomique du stock
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        post: operations["orders_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders/{order_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consulter le détail d'une de ses commandes
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        get: operations["orders_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/orders/{order_id}/cancel/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Annuler sa commande (EN_ATTENTE ou CONFIRMEE)
+         * @description Empêche toute mise en cache HTTP des réponses authentifiées ou sensibles.
+         */
+        post: operations["orders_cancel_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/settings/public/": {
         parameters: {
             query?: never;
@@ -445,6 +629,13 @@ export interface components {
             readonly logo_url: string;
         };
         /**
+         * @description * `CUSTOMER` - Client
+         *     * `DEPOT_NON_CONFORMITY` - Non-conformité bouteille vide
+         *     * `SYSTEM` - Système
+         * @enum {string}
+         */
+        CancellationSourceEnum: "CUSTOMER" | "DEPOT_NON_CONFORMITY" | "SYSTEM";
+        /**
          * @description * `FULL` - Pleine
          *     * `EMPTY` - Vide
          *     * `NEW` - Neuve
@@ -452,6 +643,76 @@ export interface components {
          * @enum {string}
          */
         CategoryEnum: "FULL" | "EMPTY" | "NEW" | "DEPOSIT";
+        CustomerOrder: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly reference: string;
+            readonly depot: components["schemas"]["OrderDepotSummary"];
+            readonly status: components["schemas"]["OrderStatusEnum"];
+            readonly payment_status: components["schemas"]["PaymentStatusEnum"];
+            /** @description Montant total figé en FCFA au moment de la création. */
+            readonly total_amount: number;
+            /** Format: date-time */
+            readonly response_deadline_at: string;
+            /** Format: date-time */
+            readonly pickup_deadline_at: string | null;
+            /** Format: date-time */
+            readonly confirmed_at: string | null;
+            /** Format: date-time */
+            readonly picked_up_at: string | null;
+            /** Format: date-time */
+            readonly refused_at: string | null;
+            /** Format: date-time */
+            readonly cancelled_at: string | null;
+            /** Format: date-time */
+            readonly expired_at: string | null;
+            readonly status_reason: string;
+            readonly cancellation_source: components["schemas"]["CancellationSourceEnum"];
+            readonly counted_as_no_show: boolean;
+            readonly items: components["schemas"]["OrderItem"][];
+            readonly payment: components["schemas"]["PaymentRecord"] | null;
+            readonly status_history: components["schemas"]["OrderStatusHistory"][];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        DepotOrder: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly reference: string;
+            readonly customer: components["schemas"]["OrderCustomerSummary"];
+            readonly depot: components["schemas"]["OrderDepotSummary"];
+            /** @default PENDING */
+            readonly status: components["schemas"]["OrderStatusEnum"];
+            readonly payment_status: components["schemas"]["PaymentStatusEnum"];
+            /** @description Montant total figé en FCFA au moment de la création. */
+            readonly total_amount: number;
+            /** Format: date-time */
+            readonly response_deadline_at: string;
+            /** Format: date-time */
+            readonly pickup_deadline_at: string | null;
+            /** Format: date-time */
+            readonly confirmed_at: string | null;
+            /** Format: date-time */
+            readonly picked_up_at: string | null;
+            /** Format: date-time */
+            readonly refused_at: string | null;
+            /** Format: date-time */
+            readonly cancelled_at: string | null;
+            /** Format: date-time */
+            readonly expired_at: string | null;
+            readonly status_reason: string;
+            readonly cancellation_source: components["schemas"]["CancellationSourceEnum"];
+            readonly counted_as_no_show: boolean;
+            readonly items: components["schemas"]["OrderItem"][];
+            readonly payment: components["schemas"]["PaymentRecord"] | null;
+            readonly status_history: components["schemas"]["OrderStatusHistory"][];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
         DepotStock: {
             /** Format: uuid */
             readonly id: string;
@@ -600,6 +861,122 @@ export interface components {
          * @enum {string}
          */
         OperationTypeEnum: "REFILL" | "EXCHANGE" | "FIRST_ACQUISITION";
+        OrderCancelRequestRequest: {
+            /** @default  */
+            reason: string;
+        };
+        OrderCreateRequestRequest: {
+            /** Format: uuid */
+            depot_id: string;
+            /** Format: uuid */
+            product_id: string;
+            operation_type: components["schemas"]["OperationTypeEnum"];
+            quantity: number;
+            /** Format: uuid */
+            exchange_brand_id?: string | null;
+        };
+        OrderCustomerSummary: {
+            readonly full_name: string;
+            /** @description Numéro au format international E.164 (ex. +2250701020304). */
+            readonly phone: string;
+        };
+        OrderDepotSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly address: string;
+            /** @description Quartier ou zone de référence pour la recherche textuelle. */
+            readonly neighborhood: string;
+            /** @description Numéro de contact affiché sur la fiche publique (format E.164). */
+            readonly phone: string;
+            /** Format: time */
+            readonly opening_time: string;
+            /** Format: time */
+            readonly closing_time: string;
+            /** Format: double */
+            readonly latitude: number;
+            /** Format: double */
+            readonly longitude: number;
+        };
+        OrderItem: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly product_id: string;
+            readonly brand_name: string;
+            readonly product_name: string;
+            /** Format: decimal */
+            readonly capacity_kg: string;
+            readonly operation_type: components["schemas"]["OperationTypeEnum"];
+            readonly exchange_brand_name: string;
+            readonly quantity: number;
+            readonly unit_gas_price: number;
+            readonly unit_bottle_price: number;
+            readonly unit_deposit_amount: number;
+            readonly unit_total_price: number;
+            readonly line_total_amount: number;
+        };
+        OrderPickupRequestRequest: {
+            payment_method: components["schemas"]["PaymentMethodEnum"];
+            received_amount?: number;
+            /** @default  */
+            external_reference: string;
+            /** @default  */
+            notes: string;
+        };
+        OrderReasonRequiredRequestRequest: {
+            reason: string;
+        };
+        /**
+         * @description * `PENDING` - En attente
+         *     * `CONFIRMED` - Confirmée
+         *     * `PICKED_UP` - Retirée
+         *     * `REFUSED` - Refusée
+         *     * `EXPIRED` - Expirée
+         *     * `CANCELLED` - Annulée
+         * @enum {string}
+         */
+        OrderStatusEnum: "PENDING" | "CONFIRMED" | "PICKED_UP" | "REFUSED" | "EXPIRED" | "CANCELLED";
+        OrderStatusHistory: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly from_status: components["schemas"]["OrderStatusEnum"];
+            readonly to_status: components["schemas"]["OrderStatusEnum"];
+            readonly reason: string;
+            readonly actor_name: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        PaginatedCustomerOrderList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["CustomerOrder"][];
+        };
+        PaginatedDepotOrderList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next?: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous?: string | null;
+            results: components["schemas"]["DepotOrder"][];
+        };
         PaginatedDepotStockList: {
             /** @example 123 */
             count: number;
@@ -715,6 +1092,30 @@ export interface components {
             full_name?: string;
             phone?: string;
         };
+        /**
+         * @description * `CASH` - Espèces
+         *     * `MOBILE_MONEY` - Mobile Money
+         * @enum {string}
+         */
+        PaymentMethodEnum: "CASH" | "MOBILE_MONEY";
+        PaymentRecord: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly expected_amount: number;
+            readonly received_amount: number;
+            readonly payment_method: components["schemas"]["PaymentMethodEnum"];
+            readonly status: components["schemas"]["PaymentStatusEnum"];
+            readonly external_reference: string;
+            readonly notes: string;
+            /** Format: date-time */
+            readonly paid_at: string;
+        };
+        /**
+         * @description * `PENDING` - En attente
+         *     * `PAID` - Payé
+         * @enum {string}
+         */
+        PaymentStatusEnum: "PENDING" | "PAID";
         Product: {
             /** Format: uuid */
             readonly id: string;
@@ -1534,6 +1935,362 @@ export interface operations {
             };
         };
     };
+    depot_orders_list: {
+        parameters: {
+            query?: {
+                /** @description Un numéro de page de l'ensemble des résultats. */
+                page?: number;
+                /** @description Nombre de résultats à retourner par page. */
+                page_size?: number;
+                /**
+                 * @description * `PENDING` - En attente
+                 *     * `CONFIRMED` - Confirmée
+                 *     * `PICKED_UP` - Retirée
+                 *     * `REFUSED` - Refusée
+                 *     * `EXPIRED` - Expirée
+                 *     * `CANCELLED` - Annulée
+                 */
+                status?: "PENDING" | "CONFIRMED" | "PICKED_UP" | "REFUSED" | "EXPIRED" | "CANCELLED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedDepotOrderList"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_orders_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DepotOrder"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_orders_accept_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DepotOrder"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_orders_cancel_non_conformity_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderReasonRequiredRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OrderReasonRequiredRequestRequest"];
+                "multipart/form-data": components["schemas"]["OrderReasonRequiredRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DepotOrder"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_orders_pickup_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderPickupRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OrderPickupRequestRequest"];
+                "multipart/form-data": components["schemas"]["OrderPickupRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DepotOrder"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_orders_refuse_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderReasonRequiredRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OrderReasonRequiredRequestRequest"];
+                "multipart/form-data": components["schemas"]["OrderReasonRequiredRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DepotOrder"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     depot_proposals_list: {
         parameters: {
             query?: {
@@ -2030,6 +2787,240 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HealthCheck"];
+                };
+            };
+        };
+    };
+    orders_list: {
+        parameters: {
+            query?: {
+                /** @description Un numéro de page de l'ensemble des résultats. */
+                page?: number;
+                /** @description Nombre de résultats à retourner par page. */
+                page_size?: number;
+                /**
+                 * @description * `PENDING` - En attente
+                 *     * `CONFIRMED` - Confirmée
+                 *     * `PICKED_UP` - Retirée
+                 *     * `REFUSED` - Refusée
+                 *     * `EXPIRED` - Expirée
+                 *     * `CANCELLED` - Annulée
+                 */
+                status?: "PENDING" | "CONFIRMED" | "PICKED_UP" | "REFUSED" | "EXPIRED" | "CANCELLED";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCustomerOrderList"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    orders_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrderCreateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OrderCreateRequestRequest"];
+                "multipart/form-data": components["schemas"]["OrderCreateRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerOrder"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    orders_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerOrder"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    orders_cancel_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                order_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["OrderCancelRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OrderCancelRequestRequest"];
+                "multipart/form-data": components["schemas"]["OrderCancelRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerOrder"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
                 };
             };
         };

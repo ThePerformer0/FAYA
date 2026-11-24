@@ -20,6 +20,7 @@ urlpatterns = [
     path("api/v1/catalog/", include("apps.catalog.api.urls")),
     path("api/v1/depots/", include("apps.depots.api.urls")),
     path("api/v1/depot/", include("apps.depots.api.portal_urls")),
+    path("api/v1/orders/", include("apps.orders.api.urls")),
 ]
 
 if settings.DEBUG:

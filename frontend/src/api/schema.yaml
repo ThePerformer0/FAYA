@@ -577,6 +577,362 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: ''
+  /api/v1/depot/orders/:
+    get:
+      operationId: depot_orders_list
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Lister les commandes reçues par son dépôt
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          enum:
+          - PENDING
+          - CONFIRMED
+          - PICKED_UP
+          - REFUSED
+          - EXPIRED
+          - CANCELLED
+          type: string
+          minLength: 1
+        description: |-
+          * `PENDING` - En attente
+          * `CONFIRMED` - Confirmée
+          * `PICKED_UP` - Retirée
+          * `REFUSED` - Refusée
+          * `EXPIRED` - Expirée
+          * `CANCELLED` - Annulée
+      tags:
+      - Depot Orders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDepotOrderList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/orders/{order_id}/:
+    get:
+      operationId: depot_orders_retrieve
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Consulter le détail d'une commande de son dépôt
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Depot Orders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepotOrder'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/orders/{order_id}/accept/:
+    post:
+      operationId: depot_orders_accept_create
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Accepter une commande EN_ATTENTE (calcule l'échéance de retrait)
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Depot Orders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepotOrder'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/orders/{order_id}/cancel-non-conformity/:
+    post:
+      operationId: depot_orders_cancel_non_conformity_create
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Annuler une commande CONFIRMEE pour bouteille vide non conforme
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Depot Orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderReasonRequiredRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderReasonRequiredRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderReasonRequiredRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepotOrder'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/orders/{order_id}/pickup/:
+    post:
+      operationId: depot_orders_pickup_create
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Valider le retrait au comptoir, le paiement et le retour bouteille
+        vide
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Depot Orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderPickupRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderPickupRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderPickupRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepotOrder'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/depot/orders/{order_id}/refuse/:
+    post:
+      operationId: depot_orders_refuse_create
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Refuser une commande EN_ATTENTE avec motif obligatoire
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Depot Orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderReasonRequiredRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderReasonRequiredRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderReasonRequiredRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepotOrder'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
   /api/v1/depot/proposals/:
     get:
       operationId: depot_proposals_list
@@ -1134,6 +1490,239 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthCheck'
           description: ''
+  /api/v1/orders/:
+    get:
+      operationId: orders_list
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Lister les commandes du client connecté
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          enum:
+          - PENDING
+          - CONFIRMED
+          - PICKED_UP
+          - REFUSED
+          - EXPIRED
+          - CANCELLED
+          type: string
+          minLength: 1
+        description: |-
+          * `PENDING` - En attente
+          * `CONFIRMED` - Confirmée
+          * `PICKED_UP` - Retirée
+          * `REFUSED` - Refusée
+          * `EXPIRED` - Expirée
+          * `CANCELLED` - Annulée
+      tags:
+      - Customer Orders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCustomerOrderList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+    post:
+      operationId: orders_create
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Créer une commande de retrait au dépôt avec réservation atomique du
+        stock
+      tags:
+      - Customer Orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/orders/{order_id}/:
+    get:
+      operationId: orders_retrieve
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Consulter le détail d'une de ses commandes
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Customer Orders
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+  /api/v1/orders/{order_id}/cancel/:
+    post:
+      operationId: orders_cancel_create
+      description: Empêche toute mise en cache HTTP des réponses authentifiées ou
+        sensibles.
+      summary: Annuler sa commande (EN_ATTENTE ou CONFIRMEE)
+      parameters:
+      - in: path
+        name: order_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Customer Orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCancelRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderCancelRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderCancelRequestRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerOrder'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: ''
   /api/v1/settings/public/:
     get:
       operationId: settings_public_retrieve
@@ -1218,6 +1807,16 @@ components:
       - id
       - logo_url
       - name
+    CancellationSourceEnum:
+      enum:
+      - CUSTOMER
+      - DEPOT_NON_CONFORMITY
+      - SYSTEM
+      type: string
+      description: |-
+        * `CUSTOMER` - Client
+        * `DEPOT_NON_CONFORMITY` - Non-conformité bouteille vide
+        * `SYSTEM` - Système
     CategoryEnum:
       enum:
       - FULL
@@ -1230,6 +1829,242 @@ components:
         * `EMPTY` - Vide
         * `NEW` - Neuve
         * `DEPOSIT` - Sous consigne
+    CustomerOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+        depot:
+          allOf:
+          - $ref: '#/components/schemas/OrderDepotSummary'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/OrderStatusEnum'
+          readOnly: true
+        payment_status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+        total_amount:
+          type: integer
+          readOnly: true
+          description: Montant total figé en FCFA au moment de la création.
+        response_deadline_at:
+          type: string
+          format: date-time
+          readOnly: true
+        pickup_deadline_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        confirmed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        picked_up_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        refused_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        expired_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        status_reason:
+          type: string
+          readOnly: true
+        cancellation_source:
+          allOf:
+          - $ref: '#/components/schemas/CancellationSourceEnum'
+          readOnly: true
+        counted_as_no_show:
+          type: boolean
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          readOnly: true
+        payment:
+          allOf:
+          - $ref: '#/components/schemas/PaymentRecord'
+          nullable: true
+          readOnly: true
+        status_history:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderStatusHistory'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - cancellation_source
+      - cancelled_at
+      - confirmed_at
+      - counted_as_no_show
+      - created_at
+      - depot
+      - expired_at
+      - id
+      - items
+      - payment
+      - payment_status
+      - picked_up_at
+      - pickup_deadline_at
+      - reference
+      - refused_at
+      - response_deadline_at
+      - status
+      - status_history
+      - status_reason
+      - total_amount
+      - updated_at
+    DepotOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        reference:
+          type: string
+          readOnly: true
+        customer:
+          allOf:
+          - $ref: '#/components/schemas/OrderCustomerSummary'
+          readOnly: true
+        depot:
+          allOf:
+          - $ref: '#/components/schemas/OrderDepotSummary'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/OrderStatusEnum'
+          readOnly: true
+          default: PENDING
+        payment_status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+        total_amount:
+          type: integer
+          readOnly: true
+          description: Montant total figé en FCFA au moment de la création.
+        response_deadline_at:
+          type: string
+          format: date-time
+          readOnly: true
+        pickup_deadline_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        confirmed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        picked_up_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        refused_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        expired_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        status_reason:
+          type: string
+          readOnly: true
+        cancellation_source:
+          allOf:
+          - $ref: '#/components/schemas/CancellationSourceEnum'
+          readOnly: true
+        counted_as_no_show:
+          type: boolean
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          readOnly: true
+        payment:
+          allOf:
+          - $ref: '#/components/schemas/PaymentRecord'
+          nullable: true
+          readOnly: true
+        status_history:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderStatusHistory'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - cancellation_source
+      - cancelled_at
+      - confirmed_at
+      - counted_as_no_show
+      - created_at
+      - customer
+      - depot
+      - expired_at
+      - id
+      - items
+      - payment
+      - payment_status
+      - picked_up_at
+      - pickup_deadline_at
+      - reference
+      - refused_at
+      - response_deadline_at
+      - status
+      - status_history
+      - status_reason
+      - total_amount
+      - updated_at
     DepotStock:
       type: object
       properties:
@@ -1624,6 +2459,281 @@ components:
         * `REFILL` - Recharge
         * `EXCHANGE` - Échange
         * `FIRST_ACQUISITION` - Première bouteille
+    OrderCancelRequestRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          default: ''
+          maxLength: 500
+    OrderCreateRequestRequest:
+      type: object
+      properties:
+        depot_id:
+          type: string
+          format: uuid
+        product_id:
+          type: string
+          format: uuid
+        operation_type:
+          $ref: '#/components/schemas/OperationTypeEnum'
+        quantity:
+          type: integer
+          maximum: 2147483647
+          minimum: 1
+        exchange_brand_id:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - depot_id
+      - operation_type
+      - product_id
+      - quantity
+    OrderCustomerSummary:
+      type: object
+      properties:
+        full_name:
+          type: string
+          readOnly: true
+        phone:
+          type: string
+          readOnly: true
+          description: Numéro au format international E.164 (ex. +2250701020304).
+      required:
+      - full_name
+      - phone
+    OrderDepotSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        address:
+          type: string
+          readOnly: true
+        neighborhood:
+          type: string
+          readOnly: true
+          description: Quartier ou zone de référence pour la recherche textuelle.
+        phone:
+          type: string
+          readOnly: true
+          description: Numéro de contact affiché sur la fiche publique (format E.164).
+        opening_time:
+          type: string
+          format: time
+          readOnly: true
+        closing_time:
+          type: string
+          format: time
+          readOnly: true
+        latitude:
+          type: number
+          format: double
+          readOnly: true
+        longitude:
+          type: number
+          format: double
+          readOnly: true
+      required:
+      - address
+      - closing_time
+      - id
+      - latitude
+      - longitude
+      - name
+      - neighborhood
+      - opening_time
+      - phone
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        product_id:
+          type: string
+          format: uuid
+          readOnly: true
+        brand_name:
+          type: string
+          readOnly: true
+        product_name:
+          type: string
+          readOnly: true
+        capacity_kg:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          readOnly: true
+        operation_type:
+          allOf:
+          - $ref: '#/components/schemas/OperationTypeEnum'
+          readOnly: true
+        exchange_brand_name:
+          type: string
+          readOnly: true
+        quantity:
+          type: integer
+          readOnly: true
+        unit_gas_price:
+          type: integer
+          readOnly: true
+        unit_bottle_price:
+          type: integer
+          readOnly: true
+        unit_deposit_amount:
+          type: integer
+          readOnly: true
+        unit_total_price:
+          type: integer
+          readOnly: true
+        line_total_amount:
+          type: integer
+          readOnly: true
+      required:
+      - brand_name
+      - capacity_kg
+      - exchange_brand_name
+      - id
+      - line_total_amount
+      - operation_type
+      - product_id
+      - product_name
+      - quantity
+      - unit_bottle_price
+      - unit_deposit_amount
+      - unit_gas_price
+      - unit_total_price
+    OrderPickupRequestRequest:
+      type: object
+      properties:
+        payment_method:
+          $ref: '#/components/schemas/PaymentMethodEnum'
+        received_amount:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        external_reference:
+          type: string
+          default: ''
+          maxLength: 120
+        notes:
+          type: string
+          default: ''
+          maxLength: 500
+      required:
+      - payment_method
+    OrderReasonRequiredRequestRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - reason
+    OrderStatusEnum:
+      enum:
+      - PENDING
+      - CONFIRMED
+      - PICKED_UP
+      - REFUSED
+      - EXPIRED
+      - CANCELLED
+      type: string
+      description: |-
+        * `PENDING` - En attente
+        * `CONFIRMED` - Confirmée
+        * `PICKED_UP` - Retirée
+        * `REFUSED` - Refusée
+        * `EXPIRED` - Expirée
+        * `CANCELLED` - Annulée
+    OrderStatusHistory:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        from_status:
+          allOf:
+          - $ref: '#/components/schemas/OrderStatusEnum'
+          readOnly: true
+        to_status:
+          allOf:
+          - $ref: '#/components/schemas/OrderStatusEnum'
+          readOnly: true
+        reason:
+          type: string
+          readOnly: true
+        actor_name:
+          type: string
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - actor_name
+      - created_at
+      - from_status
+      - id
+      - reason
+      - to_status
+    PaginatedCustomerOrderList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerOrder'
+    PaginatedDepotOrderList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DepotOrder'
     PaginatedDepotStockList:
       type: object
       required:
@@ -1826,6 +2936,62 @@ components:
           minLength: 1
           pattern: ^\+[1-9][0-9]{7,14}$
           maxLength: 20
+    PaymentMethodEnum:
+      enum:
+      - CASH
+      - MOBILE_MONEY
+      type: string
+      description: |-
+        * `CASH` - Espèces
+        * `MOBILE_MONEY` - Mobile Money
+    PaymentRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        expected_amount:
+          type: integer
+          readOnly: true
+        received_amount:
+          type: integer
+          readOnly: true
+        payment_method:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethodEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+        external_reference:
+          type: string
+          readOnly: true
+        notes:
+          type: string
+          readOnly: true
+        paid_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - expected_amount
+      - external_reference
+      - id
+      - notes
+      - paid_at
+      - payment_method
+      - received_amount
+      - status
+    PaymentStatusEnum:
+      enum:
+      - PENDING
+      - PAID
+      type: string
+      description: |-
+        * `PENDING` - En attente
+        * `PAID` - Payé
     Product:
       type: object
       properties:
