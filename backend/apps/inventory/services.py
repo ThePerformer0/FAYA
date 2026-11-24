@@ -22,6 +22,7 @@ VALID_CATEGORIES = frozenset(StockCategory.values)
 ADJUSTMENT_MOVEMENT_TYPES = frozenset(
     {StockMovementType.INVENTORY_CORRECTION, StockMovementType.MANUAL_ADJUSTMENT}
 )
+MAX_STOCK_QUANTITY = 2_147_483_647
 
 
 def assert_depot_editable(depot: Depot) -> None:
@@ -96,15 +97,25 @@ def restock_depot_stock(
     assert_depot_editable(locked_depot)
     _validate_stock_target(product=product, category=category)
 
-    if isinstance(quantity, bool) or not isinstance(quantity, int) or quantity <= 0:
+    if (
+        isinstance(quantity, bool)
+        or not isinstance(quantity, int)
+        or quantity <= 0
+        or quantity > MAX_STOCK_QUANTITY
+    ):
         raise ValidationDomainError(
-            "La quantité d'approvisionnement doit être un entier strictement positif.",
-            details={"quantity": ["Doit être supérieur à 0."]},
+            "La quantité d'approvisionnement doit être un entier strictement positif valide.",
+            details={"quantity": [f"Doit être compris entre 1 et {MAX_STOCK_QUANTITY}."]},
         )
 
     stock = _get_or_create_locked_stock(depot=locked_depot, product=product, category=category)
     before = stock.physical_quantity
     after = before + quantity
+    if after > MAX_STOCK_QUANTITY:
+        raise ValidationDomainError(
+            "Le stock physique maximal autorisé serait dépassé.",
+            details={"quantity": [f"Le stock total ne peut pas dépasser {MAX_STOCK_QUANTITY}."]},
+        )
     stock.physical_quantity = after
     stock.save(update_fields=["physical_quantity", "updated_at"])
 
@@ -155,10 +166,11 @@ def adjust_depot_stock(
         isinstance(new_physical_quantity, bool)
         or not isinstance(new_physical_quantity, int)
         or new_physical_quantity < 0
+        or new_physical_quantity > MAX_STOCK_QUANTITY
     ):
         raise ValidationDomainError(
-            "La nouvelle quantité physique doit être un entier supérieur ou égal à 0.",
-            details={"new_physical_quantity": ["Doit être supérieur ou égal à 0."]},
+            "La nouvelle quantité physique doit être un entier valide.",
+            details={"new_physical_quantity": [f"Doit être compris entre 0 et {MAX_STOCK_QUANTITY}."]},
         )
 
     stock = _get_or_create_locked_stock(depot=locked_depot, product=product, category=category)

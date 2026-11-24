@@ -128,7 +128,7 @@ class DepotStock(TimeStampedUUIDModel):
 
 
 class ImmutableStockMovementQuerySet(models.QuerySet):
-    """Interdit toute modification ou suppression en masse du journal des mouvements."""
+    """Interdit toute modification, upsert ou suppression en masse du journal des mouvements."""
 
     def update(self, **kwargs):
         raise PermissionError(
@@ -140,6 +140,18 @@ class ImmutableStockMovementQuerySet(models.QuerySet):
             "Le journal des mouvements de stock est immuable : suppression interdite."
         )
 
+    def bulk_update(self, objs, fields, batch_size=None):
+        raise PermissionError(
+            "Le journal des mouvements de stock est immuable : modification en masse interdite."
+        )
+
+    def bulk_create(self, objs, *args, update_conflicts=False, **kwargs):
+        if update_conflicts:
+            raise PermissionError(
+                "Le journal des mouvements de stock est immuable : upsert interdit."
+            )
+        return super().bulk_create(objs, *args, update_conflicts=False, **kwargs)
+
 
 class StockMovement(models.Model):
     """Journal immuable de chaque variation de stock d'un dépôt (CDC §6.2)."""
@@ -147,7 +159,7 @@ class StockMovement(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     depot = models.ForeignKey(
         "depots.Depot",
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="stock_movements",
     )
     product = models.ForeignKey(

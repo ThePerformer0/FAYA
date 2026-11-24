@@ -9,6 +9,7 @@ from apps.inventory.models import (
     StockMovement,
     StockMovementType,
 )
+from apps.inventory.services import MAX_STOCK_QUANTITY
 
 
 class DepotStockSerializer(serializers.ModelSerializer):
@@ -69,17 +70,26 @@ class StockMovementFilterQuerySerializer(serializers.Serializer):
     movement_type = serializers.ChoiceField(choices=StockMovementType.choices, required=False)
 
 
+class StrictIntegerField(serializers.IntegerField):
+    """Entier JSON strict : refuse les booléens et les chaînes de caractères."""
+
+    def to_internal_value(self, data):
+        if isinstance(data, bool) or not isinstance(data, int):
+            self.fail("invalid")
+        return super().to_internal_value(data)
+
+
 class StockRestockRequestSerializer(serializers.Serializer):
     product_id = serializers.UUIDField()
     category = serializers.ChoiceField(choices=StockCategory.choices)
-    quantity = serializers.IntegerField(min_value=1)
+    quantity = StrictIntegerField(min_value=1, max_value=MAX_STOCK_QUANTITY)
     reason = serializers.CharField(allow_blank=True, default="", required=False, max_length=500)
 
 
 class StockAdjustRequestSerializer(serializers.Serializer):
     product_id = serializers.UUIDField()
     category = serializers.ChoiceField(choices=StockCategory.choices)
-    new_physical_quantity = serializers.IntegerField(min_value=0)
+    new_physical_quantity = StrictIntegerField(min_value=0, max_value=MAX_STOCK_QUANTITY)
     movement_type = serializers.ChoiceField(
         choices=[
             (StockMovementType.INVENTORY_CORRECTION, StockMovementType.INVENTORY_CORRECTION.label),
@@ -89,11 +99,13 @@ class StockAdjustRequestSerializer(serializers.Serializer):
         required=False,
     )
     reason = serializers.CharField(max_length=500)
-    expected_physical_quantity = serializers.IntegerField(min_value=0, required=False)
+    expected_physical_quantity = StrictIntegerField(
+        min_value=0, max_value=MAX_STOCK_QUANTITY, required=False
+    )
 
 
 class StockScrapRequestSerializer(serializers.Serializer):
     product_id = serializers.UUIDField()
     category = serializers.ChoiceField(choices=StockCategory.choices)
-    quantity = serializers.IntegerField(min_value=1)
+    quantity = StrictIntegerField(min_value=1, max_value=MAX_STOCK_QUANTITY)
     reason = serializers.CharField(max_length=500)

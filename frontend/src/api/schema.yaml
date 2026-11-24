@@ -2211,6 +2211,7 @@ components:
           $ref: '#/components/schemas/CategoryEnum'
         new_physical_quantity:
           type: integer
+          maximum: 2147483647
           minimum: 0
         movement_type:
           allOf:
@@ -2222,6 +2223,7 @@ components:
           maxLength: 500
         expected_physical_quantity:
           type: integer
+          maximum: 2147483647
           minimum: 0
       required:
       - category
@@ -2322,6 +2324,7 @@ components:
           $ref: '#/components/schemas/CategoryEnum'
         quantity:
           type: integer
+          maximum: 2147483647
           minimum: 1
         reason:
           type: string
@@ -2341,6 +2344,7 @@ components:
           $ref: '#/components/schemas/CategoryEnum'
         quantity:
           type: integer
+          maximum: 2147483647
           minimum: 1
         reason:
           type: string
