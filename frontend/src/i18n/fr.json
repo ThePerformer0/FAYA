@@ -66,8 +66,17 @@
     "showMap": "Carte",
     "hideMap": "Masquer la carte",
     "chooseAction": "Choisir",
-    "chooseOperationTitle": "Tarifs et opérations",
-    "orderingComingSoon": "La réservation en ligne arrive au prochain jalon. Vous pouvez consulter les tarifs et appeler le dépôt directement.",
+    "chooseOperationTitle": "Commander pour retrait",
+    "selectOperationPrompt": "Choisissez votre opération",
+    "selectExchangeBrandPrompt": "Quelle marque de bouteille vide rapportez-vous ?",
+    "exchangeBrandRequired": "Sélectionnez la marque de votre bouteille vide pour continuer.",
+    "quantityLabel": "Quantité",
+    "quantityMaxHint": "Maximum {{max}} bouteilles par commande.",
+    "reserveAction": "Réserver pour retrait",
+    "reserving": "Réservation…",
+    "loginToOrder": "Se connecter pour réserver",
+    "customerAccountOnly": "Seuls les comptes clients peuvent passer commande. Connectez-vous avec un compte client.",
+    "orderCreatedNotice": "Réservation envoyée au dépôt.",
     "notFoundTitle": "Dépôt introuvable",
     "notFoundBody": "Ce dépôt n'est plus actif ou l'adresse est incorrecte.",
     "stock": {
@@ -129,10 +138,56 @@
     "staleDays": "Données non vérifiées depuis {{days}} j"
   },
   "orders": {
-    "title": "Commande",
+    "title": "Mes commandes",
+    "activeTitle": "Commande en cours",
+    "historyTitle": "Historique",
+    "allStatuses": "Toutes",
     "emptyTitle": "Pas encore de commande",
-    "emptyBody": "Quand vous réserverez une bouteille, elle apparaîtra ici avec son heure de retrait.",
-    "findDepot": "Trouver un dépôt"
+    "emptyBody": "Quand vous réserverez une bouteille, elle apparaîtra ici avec son code de retrait et son compte à rebours.",
+    "loginRequiredTitle": "Connectez-vous pour suivre vos commandes",
+    "loginRequiredBody": "Retrouvez ici votre réservation active, son heure limite de retrait et votre historique.",
+    "loginAction": "Se connecter",
+    "managerNoticeTitle": "Espace réservé aux commandes clients",
+    "managerNoticeBody": "Pour traiter les commandes reçues par votre dépôt, ouvrez votre portail Responsable.",
+    "goPortalOrders": "Ouvrir les commandes du dépôt",
+    "findDepot": "Trouver un dépôt",
+    "referenceLabel": "Code retrait",
+    "status": {
+      "PENDING": "En attente du dépôt",
+      "CONFIRMED": "Confirmée · prête au retrait",
+      "PICKED_UP": "Retirée",
+      "REFUSED": "Refusée",
+      "EXPIRED": "Expirée",
+      "CANCELLED": "Annulée"
+    },
+    "paymentStatus": {
+      "PENDING": "À payer au dépôt",
+      "PAID": "Payé au dépôt"
+    },
+    "paymentMethod": {
+      "CASH": "Espèces",
+      "MOBILE_MONEY": "Mobile Money"
+    },
+    "countdown": {
+      "pendingLabel": "Réponse du dépôt avant {{time}}",
+      "confirmedLabel": "À retirer avant {{time}}",
+      "expiredLabel": "Échéance dépassée",
+      "timeLeft": "Temps restant"
+    },
+    "bringEmptySameBrand": "À rapporter au comptoir : {{count}} bouteille(s) vide(s) {{brand}} ({{capacity}}).",
+    "bringEmptyExchange": "À rapporter au comptoir : {{count}} bouteille(s) vide(s) de marque {{brand}} ({{capacity}}).",
+    "viewDepot": "Fiche du dépôt",
+    "cancelAction": "Annuler la commande",
+    "cancelSheetTitle": "Annuler cette commande",
+    "cancelSheetHint": "Votre réservation de stock sera libérée immédiatement. Une annulation ne compte pas comme un retrait non effectué.",
+    "cancelReasonLabel": "Motif (optionnel)",
+    "cancelReasonPlaceholder": "Ex. Je ne peux finalement pas passer aujourd'hui",
+    "confirmCancel": "Confirmer l'annulation",
+    "cancelledNotice": "Commande annulée. Le stock a été libéré.",
+    "paymentReceipt": "Paiement : {{method}} · {{amount}}",
+    "paymentRef": "Réf. {{ref}}",
+    "noShowTag": "Retrait non effectué",
+    "reasonPrefix": "Motif : {{reason}}"
   },
   "errors": {
     "networkTitle": "Pas de connexion",
@@ -334,9 +389,39 @@
       }
     },
     "orders": {
-      "title": "File des commandes",
-      "body": "La réception et la confirmation des commandes clients (retrait au dépôt, retour bouteille vide et encaissement) seront activées au Jalon 3.",
-      "goStocks": "Gérer mes stocks"
+      "title": "Commandes du dépôt",
+      "tabPending": "En attente",
+      "tabConfirmed": "Confirmées",
+      "tabAll": "Toutes",
+      "emptyPendingTitle": "Aucune commande en attente",
+      "emptyPendingBody": "Les nouvelles demandes clients apparaissent ici automatiquement. Vous disposez de 15 minutes pour répondre.",
+      "emptyConfirmedTitle": "Aucun retrait en attente",
+      "emptyConfirmedBody": "Dès que vous acceptez une commande, elle apparaît ici en attendant le passage du client.",
+      "emptyAllTitle": "Aucune commande reçue",
+      "emptyAllBody": "Dès qu'un client réservera une bouteille dans votre dépôt, vous pourrez la traiter ici.",
+      "acceptAction": "Accepter",
+      "refuseAction": "Refuser",
+      "pickupAction": "Valider le retrait",
+      "nonConformityAction": "Bouteille non conforme",
+      "refuseTitle": "Refuser la commande",
+      "refuseReasonLabel": "Motif du refus (obligatoire)",
+      "refuseReasonPlaceholder": "Ex. Stock réel insuffisant ou fermeture exceptionnelle",
+      "nonConformityTitle": "Annuler pour bouteille vide non conforme",
+      "nonConformityHint": "La réservation est libérée immédiatement et l'annulation n'est pas comptée comme un retrait non effectué.",
+      "nonConformityReasonLabel": "Motif de non-conformité (obligatoire)",
+      "nonConformityReasonPlaceholder": "Ex. Marque différente ou bouteille endommagée",
+      "pickupTitle": "Enregistrer le retrait et le paiement",
+      "pickupEmptyReminder": "Vérifiez la réception de {{count}} bouteille(s) vide(s) {{brand}} ({{capacity}}) avant de valider.",
+      "paymentMethodLabel": "Moyen de paiement encaissé",
+      "expectedAmountLabel": "Montant intégral à encaisser",
+      "externalRefLabel": "Référence Mobile Money (optionnel)",
+      "externalRefPlaceholder": "Ex. MP260304.1422.A01234",
+      "notesLabel": "Note interne (optionnel)",
+      "confirmPickup": "Confirmer le retrait",
+      "acceptedNotice": "Commande confirmée. Le client a été informé de l'heure limite de retrait.",
+      "refusedNotice": "Commande refusée et stock libéré.",
+      "pickedUpNotice": "Retrait enregistré, paiement validé et stock mis à jour.",
+      "nonConformityNotice": "Commande annulée pour non-conformité et stock libéré."
     }
   }
 }

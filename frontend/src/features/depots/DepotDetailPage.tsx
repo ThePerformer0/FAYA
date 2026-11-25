@@ -6,10 +6,13 @@
 
 import {
   IconArrowLeft,
+  IconCheck,
   IconChevronRight,
   IconCurrentLocation,
   IconExternalLink,
+  IconMinus,
   IconPhone,
+  IconPlus,
   IconRoute,
 } from "@tabler/icons-react";
 import { lazy, Suspense, useMemo, useState } from "react";
@@ -28,12 +31,15 @@ import {
   Button,
   EmptyState,
   ErrorBanner,
+  FilterChip,
   FreshnessStamp,
   OpenStatusChip,
 } from "../../design/ui";
 import { useNetworkStatus } from "../../shared/NetworkContext";
+import { useAuth } from "../auth/AuthContext";
+import { useCreateOrder } from "../orders/useOrders";
 import { usePublicSettings } from "../settings/usePublicSettings";
-import { useDepotDetail, type PublicDepotOffer } from "./useDepots";
+import { useDepotDetail, type OperationType, type PublicDepotOffer } from "./useDepots";
 
 const LazyDepotsMap = lazy(() => import("./DepotsMap"));
 
@@ -47,14 +53,34 @@ export function DepotDetailPage() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { isOnline } = useNetworkStatus();
+  const { user } = useAuth();
 
   const { data: settings } = usePublicSettings();
   const { data: depot, isLoading, error, refetch } = useDepotDetail(depotId);
+  const createOrderMutation = useCreateOrder();
 
   const [showDirectionsMap, setShowDirectionsMap] = useState(false);
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [geoStatus, setGeoStatus] = useState<"idle" | "locating" | "granted" | "denied" | "unsupported">("idle");
   const [selectedOffer, setSelectedOffer] = useState<PublicDepotOffer | null>(null);
+  const [selectedOpType, setSelectedOpType] = useState<OperationType | null>(null);
+  const [selectedExchangeBrandId, setSelectedExchangeBrandId] = useState<string>("");
+  const [orderQuantity, setOrderQuantity] = useState<number>(1);
+  const [orderError, setOrderError] = useState<string | null>(null);
+
+  const openOfferSheet = (offer: PublicDepotOffer) => {
+    setSelectedOffer(offer);
+    setOrderError(null);
+    setOrderQuantity(1);
+    setSelectedExchangeBrandId(offer.exchange_brands[0]?.id ?? "");
+    const firstAvailableOp =
+      offer.operations.find((op) =>
+        op.operation_type === "FIRST_ACQUISITION"
+          ? offer.available_new_quantity > 0 || offer.available_full_quantity > 0
+          : offer.available_full_quantity > 0,
+      ) ?? offer.operations[0];
+    setSelectedOpType(firstAvailableOp?.operation_type ?? null);
+  };
 
   const mapPoints = useMemo(
     () => (depot ? [depot] : []),
@@ -347,7 +373,7 @@ export function DepotDetailPage() {
                   <li key={offer.id}>
                     <button
                       type="button"
-                      onClick={() => setSelectedOffer(offer)}
+                      onClick={() => openOfferSheet(offer)}
                       className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition-colors duration-150 hover:bg-price-band"
                     >
                       <div className="min-w-0 flex-1">
@@ -417,7 +443,7 @@ export function DepotDetailPage() {
             disabled={!canChoose}
             onClick={() => {
               if (depot.offers.length > 0) {
-                setSelectedOffer(depot.offers[0]);
+                openOfferSheet(depot.offers[0]);
               }
             }}
           >
@@ -426,7 +452,7 @@ export function DepotDetailPage() {
         </div>
       </div>
 
-      {/* Panneau détail des opérations et décomposition transparente des prix */}
+      {/* Panneau de commande pour retrait : sélection opération, marque vide, quantité et total FCFA */}
       <BottomSheet
         open={Boolean(selectedOffer)}
         title={
@@ -439,158 +465,315 @@ export function DepotDetailPage() {
         }
         onClose={() => setSelectedOffer(null)}
       >
-        {selectedOffer && (
-          <div className="space-y-4">
-            {/* Disponibilité réelle (pleines / neuves uniquement, jamais vides) */}
-            <div className="grid grid-cols-2 gap-2.5">
-              <div className="bg-card px-3.5 py-2.5">
-                <p className="text-xs font-bold uppercase tracking-[0.3px] text-text-secondary">
-                  {t("store.stock.fullLabel")}
-                </p>
-                <p
-                  className={`mt-1 font-mono text-xl font-medium tabular ${
-                    selectedOffer.available_full_quantity > 0 ? "text-text" : "text-soon"
-                  }`}
-                >
-                  {selectedOffer.available_full_quantity}
-                </p>
+        {selectedOffer && (() => {
+          const maxPlatformQty = settings?.max_quantity_per_order ?? 3;
+          const activeOperation =
+            selectedOffer.operations.find((op) => op.operation_type === selectedOpType) ?? null;
+          const stockForSelectedOp = activeOperation
+            ? activeOperation.operation_type === "FIRST_ACQUISITION"
+              ? Math.max(selectedOffer.available_new_quantity, selectedOffer.available_full_quantity)
+              : selectedOffer.available_full_quantity
+            : 0;
+          const effectiveMaxQty = Math.max(1, Math.min(maxPlatformQty, stockForSelectedOp || 1));
+          const safeQty = Math.min(orderQuantity, effectiveMaxQty);
+          const isExchange = activeOperation?.operation_type === "EXCHANGE";
+          const needsExchangeBrand = isExchange && !selectedExchangeBrandId;
+          const totalAmount = activeOperation ? activeOperation.total_unit_price * safeQty : 0;
+
+          const canSubmitOrder =
+            Boolean(activeOperation) &&
+            isOnline &&
+            depot.can_order &&
+            stockForSelectedOp >= safeQty &&
+            !needsExchangeBrand &&
+            user?.role === "CUSTOMER";
+
+          const handleSubmitOrder = async () => {
+            if (!activeOperation || !depot) return;
+            if (!user) {
+              navigate("/login", { state: { from: `/depots/${depot.id}` } });
+              return;
+            }
+            if (needsExchangeBrand) {
+              setOrderError(t("store.exchangeBrandRequired"));
+              return;
+            }
+            setOrderError(null);
+            try {
+              await createOrderMutation.mutateAsync({
+                depot_id: depot.id,
+                product_id: selectedOffer.product.id,
+                operation_type: activeOperation.operation_type,
+                quantity: safeQty,
+                ...(isExchange ? { exchange_brand_id: selectedExchangeBrandId } : {}),
+              });
+              setSelectedOffer(null);
+              navigate("/orders", { state: { created: true } });
+            } catch (err) {
+              setOrderError(err instanceof Error ? err.message : t("errors.serverBody"));
+            }
+          };
+
+          return (
+            <div className="space-y-4">
+              {/* Disponibilité réelle (pleines / neuves uniquement, jamais vides) */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="bg-card px-3.5 py-2.5">
+                  <p className="text-xs font-bold uppercase tracking-[0.3px] text-text-secondary">
+                    {t("store.stock.fullLabel")}
+                  </p>
+                  <p
+                    className={`mt-1 font-mono text-xl font-medium tabular ${
+                      selectedOffer.available_full_quantity > 0 ? "text-text" : "text-soon"
+                    }`}
+                  >
+                    {selectedOffer.available_full_quantity}
+                  </p>
+                </div>
+                <div className="bg-card px-3.5 py-2.5">
+                  <p className="text-xs font-bold uppercase tracking-[0.3px] text-text-secondary">
+                    {t("store.stock.newLabel")}
+                  </p>
+                  <p
+                    className={`mt-1 font-mono text-xl font-medium tabular ${
+                      selectedOffer.available_new_quantity > 0 ? "text-text" : "text-text-secondary"
+                    }`}
+                  >
+                    {selectedOffer.available_new_quantity}
+                  </p>
+                </div>
               </div>
-              <div className="bg-card px-3.5 py-2.5">
-                <p className="text-xs font-bold uppercase tracking-[0.3px] text-text-secondary">
-                  {t("store.stock.newLabel")}
+
+              {selectedOffer.stock_updated_at && (
+                <FreshnessStamp
+                  updatedAt={selectedOffer.stock_updated_at}
+                  serverNow={settings?.server_now}
+                />
+              )}
+
+              {selectedOffer.notes && (
+                <p className="border-l-4 border-ink-900 bg-card px-3.5 py-2.5 text-sm text-text-secondary">
+                  {selectedOffer.notes}
                 </p>
-                <p
-                  className={`mt-1 font-mono text-xl font-medium tabular ${
-                    selectedOffer.available_new_quantity > 0 ? "text-text" : "text-text-secondary"
-                  }`}
-                >
-                  {selectedOffer.available_new_quantity}
-                </p>
-              </div>
-            </div>
+              )}
 
-            {selectedOffer.stock_updated_at && (
-              <FreshnessStamp
-                updatedAt={selectedOffer.stock_updated_at}
-                serverNow={settings?.server_now}
-              />
-            )}
+              {orderError && <ErrorBanner message={orderError} />}
 
-            {selectedOffer.notes && (
-              <p className="border-l-4 border-ink-900 bg-card px-3.5 py-2.5 text-sm text-text-secondary">
-                {selectedOffer.notes}
-              </p>
-            )}
-
-            {selectedOffer.operations.length === 0 ? (
-              <p className="text-sm text-text-secondary">{t("store.noActiveOperations")}</p>
-            ) : (
-              <div className="divide-y divide-divider bg-card">
-                {selectedOffer.operations.map((op) => {
-                  const opOutOfStock =
-                    op.operation_type === "FIRST_ACQUISITION"
-                      ? selectedOffer.available_new_quantity === 0 &&
-                        selectedOffer.available_full_quantity === 0
-                      : selectedOffer.available_full_quantity === 0;
-                  return (
-                  <div key={op.operation_type} className="p-4">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <h3 className="font-sans text-base font-bold text-text">
-                        {t(`operation.${op.operation_type}`)}
-                      </h3>
-                      <span className="font-mono text-lg font-medium tabular text-text-brand">
-                        {formatFcfa(op.total_unit_price, i18n.language)}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-sm text-text-secondary">
-                      {t(`operation.desc.${op.operation_type}`)}
-                    </p>
-                    {opOutOfStock && (
-                      <p className="mt-1.5 text-xs font-bold text-soon">
-                        {t("store.stock.unavailableForOperation")}
-                      </p>
-                    )}
-
-                    {op.operation_type === "FIRST_ACQUISITION" && (
-                      <dl className="mt-2.5 space-y-1 bg-price-band px-3 py-2 text-sm">
-                        <div className="flex justify-between">
-                          <dt className="text-text-secondary">{t("operation.priceLines.gas")}</dt>
-                          <dd className="font-mono tabular text-text">
-                            {formatFcfa(op.gas_price, i18n.language)}
-                          </dd>
-                        </div>
-                        {op.bottle_price > 0 && (
-                          <div className="flex justify-between">
-                            <dt className="text-text-secondary">
-                              {t("operation.priceLines.bottle")}
-                            </dt>
-                            <dd className="font-mono tabular text-text">
-                              {formatFcfa(op.bottle_price, i18n.language)}
-                            </dd>
+              {selectedOffer.operations.length === 0 ? (
+                <p className="text-sm text-text-secondary">{t("store.noActiveOperations")}</p>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-[0.4px] text-text-secondary">
+                    {t("store.selectOperationPrompt")}
+                  </p>
+                  <div className="space-y-2">
+                    {selectedOffer.operations.map((op) => {
+                      const opStock =
+                        op.operation_type === "FIRST_ACQUISITION"
+                          ? Math.max(
+                              selectedOffer.available_new_quantity,
+                              selectedOffer.available_full_quantity,
+                            )
+                          : selectedOffer.available_full_quantity;
+                      const opOutOfStock = opStock === 0;
+                      const isSelected = op.operation_type === selectedOpType;
+                      return (
+                        <button
+                          key={op.operation_type}
+                          type="button"
+                          onClick={() => {
+                            setSelectedOpType(op.operation_type);
+                            setOrderQuantity(1);
+                            setOrderError(null);
+                          }}
+                          className={`block w-full border-l-4 p-3.5 text-left transition-colors duration-150 ${
+                            isSelected
+                              ? "border-action bg-card"
+                              : "border-ink-300 bg-card/75 hover:bg-card"
+                          }`}
+                        >
+                          <div className="flex items-baseline justify-between gap-2">
+                            <span className="inline-flex items-center gap-2 font-sans text-base font-bold text-text">
+                              {isSelected && (
+                                <IconCheck size={16} stroke={2.4} className="text-action" aria-hidden="true" />
+                              )}
+                              <span>{t(`operation.${op.operation_type}`)}</span>
+                            </span>
+                            <span className="font-mono text-lg font-medium tabular text-text-brand">
+                              {formatFcfa(op.total_unit_price, i18n.language)}
+                            </span>
                           </div>
-                        )}
-                        {op.deposit_amount > 0 && (
-                          <div className="flex justify-between">
-                            <dt className="text-text-secondary">
-                              {t("operation.priceLines.deposit")}
-                            </dt>
-                            <dd className="font-mono tabular text-text">
-                              {formatFcfa(op.deposit_amount, i18n.language)}
-                            </dd>
-                          </div>
-                        )}
-                      </dl>
-                    )}
-
-                    {op.operation_type === "EXCHANGE" && (
-                      <div className="mt-2.5 pt-1">
-                        <p className="text-xs font-bold uppercase tracking-[0.3px] text-text-secondary">
-                          {t("store.exchangeAcceptedBrands")}
-                        </p>
-                        {selectedOffer.exchange_brands.length > 0 ? (
-                          <div className="mt-1.5 flex flex-wrap gap-1.5">
-                            {selectedOffer.exchange_brands.map((brand) => (
-                              <span
-                                key={brand.id}
-                                className="rounded-sm bg-price-band px-2.5 py-0.5 text-xs font-bold text-text"
-                              >
-                                {brand.name}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
                           <p className="mt-1 text-xs text-text-secondary">
-                            {t("store.noExchangeBrands")}
+                            {t(`operation.desc.${op.operation_type}`)}
                           </p>
-                        )}
-                      </div>
-                    )}
+                          {opOutOfStock && (
+                            <p className="mt-1 text-xs font-bold text-soon">
+                              {t("store.stock.unavailableForOperation")}
+                            </p>
+                          )}
+
+                          {op.operation_type === "FIRST_ACQUISITION" && isSelected && (
+                            <dl className="mt-2.5 space-y-1 bg-price-band px-3 py-2 text-xs">
+                              <div className="flex justify-between">
+                                <dt className="text-text-secondary">{t("operation.priceLines.gas")}</dt>
+                                <dd className="font-mono tabular text-text">
+                                  {formatFcfa(op.gas_price, i18n.language)}
+                                </dd>
+                              </div>
+                              {op.bottle_price > 0 && (
+                                <div className="flex justify-between">
+                                  <dt className="text-text-secondary">
+                                    {t("operation.priceLines.bottle")}
+                                  </dt>
+                                  <dd className="font-mono tabular text-text">
+                                    {formatFcfa(op.bottle_price, i18n.language)}
+                                  </dd>
+                                </div>
+                              )}
+                              {op.deposit_amount > 0 && (
+                                <div className="flex justify-between">
+                                  <dt className="text-text-secondary">
+                                    {t("operation.priceLines.deposit")}
+                                  </dt>
+                                  <dd className="font-mono tabular text-text">
+                                    {formatFcfa(op.deposit_amount, i18n.language)}
+                                  </dd>
+                                </div>
+                              )}
+                            </dl>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
-                  );
-                })}
+                </div>
+              )}
+
+              {/* Marque de la bouteille vide rapportée (obligatoire pour Échange) */}
+              {isExchange && (
+                <div className="space-y-2 bg-card p-3.5">
+                  <p className="text-xs font-bold uppercase tracking-[0.3px] text-text-secondary">
+                    {t("store.selectExchangeBrandPrompt")}
+                  </p>
+                  {selectedOffer.exchange_brands.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedOffer.exchange_brands.map((brand) => (
+                        <FilterChip
+                          key={brand.id}
+                          label={brand.name}
+                          selected={selectedExchangeBrandId === brand.id}
+                          onClick={() => {
+                            setSelectedExchangeBrandId(brand.id);
+                            setOrderError(null);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-soon">{t("store.noExchangeBrands")}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Sélecteur de quantité + Total transparent */}
+              {activeOperation && stockForSelectedOp > 0 && (
+                <div className="space-y-3 bg-card p-3.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.3px] text-text-secondary">
+                        {t("store.quantityLabel")}
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        {t("store.quantityMaxHint", { max: maxPlatformQty })}
+                      </p>
+                    </div>
+
+                    <div className="inline-flex items-center gap-2">
+                      <button
+                        type="button"
+                        aria-label="-"
+                        disabled={safeQty <= 1}
+                        onClick={() => setOrderQuantity((q) => Math.max(1, q - 1))}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-sm bg-surface-muted text-text hover:bg-border disabled:opacity-40"
+                      >
+                        <IconMinus size={18} stroke={2.2} aria-hidden="true" />
+                      </button>
+                      <span className="min-w-8 text-center font-mono text-xl font-bold tabular text-text">
+                        {safeQty}
+                      </span>
+                      <button
+                        type="button"
+                        aria-label="+"
+                        disabled={safeQty >= effectiveMaxQty}
+                        onClick={() => setOrderQuantity((q) => Math.min(effectiveMaxQty, q + 1))}
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-sm bg-ink-900 text-text-inverse hover:bg-ink-700 disabled:bg-surface-muted disabled:text-text-muted"
+                      >
+                        <IconPlus size={18} stroke={2.2} aria-hidden="true" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-baseline justify-between border-t border-divider pt-2.5">
+                    <span className="text-sm font-bold text-text">
+                      {t("operation.priceLines.total")}
+                    </span>
+                    <span className="font-mono text-xl font-bold tabular text-text-brand">
+                      {formatFcfa(totalAmount, i18n.language)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {disabledReason && (
+                <p className="border-l-4 border-ink-400 bg-surface-muted px-3 py-2.5 text-xs font-medium text-text-secondary">
+                  {disabledReason}
+                </p>
+              )}
+
+              {user && user.role !== "CUSTOMER" && (
+                <p className="border-l-4 border-ink-400 bg-surface-muted px-3 py-2.5 text-xs font-medium text-text-secondary">
+                  {t("store.customerAccountOnly")}
+                </p>
+              )}
+
+              <div className="flex flex-col gap-2">
+                {!user ? (
+                  <Button
+                    variant="primary"
+                    fullWidth
+                    disabled={!depot.can_order || !isOnline || stockForSelectedOp === 0}
+                    onClick={() =>
+                      navigate("/login", { state: { from: `/depots/${depot.id}` } })
+                    }
+                  >
+                    {t("store.loginToOrder")}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="primary"
+                    fullWidth
+                    disabled={!canSubmitOrder}
+                    isLoading={createOrderMutation.isPending}
+                    loadingLabel={t("store.reserving")}
+                    onClick={() => void handleSubmitOrder()}
+                  >
+                    {t("store.reserveAction")}
+                  </Button>
+                )}
+
+                <a
+                  href={`tel:${depot.phone}`}
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-surface-muted px-4 text-sm font-bold text-text hover:bg-border"
+                >
+                  <IconPhone size={18} stroke={1.75} aria-hidden="true" />
+                  <span>
+                    {t("store.call")} · {depot.phone}
+                  </span>
+                </a>
               </div>
-            )}
-
-            <p className="bg-surface-muted p-3 text-sm text-text-secondary">
-              {t("store.orderingComingSoon")}
-            </p>
-
-            <div className="flex flex-col gap-2">
-              <a
-                href={`tel:${depot.phone}`}
-                className="inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-md bg-action px-4 font-display text-lg font-bold uppercase tracking-[0.5px] text-on-action hover:bg-action-pressed"
-              >
-                <IconPhone size={20} stroke={1.75} aria-hidden="true" />
-                <span>
-                  {t("store.call")} · {depot.phone}
-                </span>
-              </a>
-              <Button variant="secondary" fullWidth onClick={() => setSelectedOffer(null)}>
-                {t("errors.close")}
-              </Button>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </BottomSheet>
     </div>
   );

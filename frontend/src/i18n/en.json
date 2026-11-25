@@ -66,8 +66,17 @@
     "showMap": "Map",
     "hideMap": "Hide map",
     "chooseAction": "Choose",
-    "chooseOperationTitle": "Prices and options",
-    "orderingComingSoon": "Online reservation arrives in the next milestone. You can check prices and call the store directly.",
+    "chooseOperationTitle": "Reserve for pickup",
+    "selectOperationPrompt": "Choose your option",
+    "selectExchangeBrandPrompt": "Which empty bottle brand are you bringing?",
+    "exchangeBrandRequired": "Select your empty bottle brand to continue.",
+    "quantityLabel": "Quantity",
+    "quantityMaxHint": "Up to {{max}} bottles per order.",
+    "reserveAction": "Reserve for pickup",
+    "reserving": "Reserving…",
+    "loginToOrder": "Sign in to reserve",
+    "customerAccountOnly": "Only customer accounts can place orders. Sign in with a customer account.",
+    "orderCreatedNotice": "Reservation sent to the store.",
     "notFoundTitle": "Store not found",
     "notFoundBody": "This store is no longer active or the link is invalid.",
     "stock": {
@@ -129,10 +138,56 @@
     "staleDays": "Not verified for {{days}} d"
   },
   "orders": {
-    "title": "Order",
+    "title": "My orders",
+    "activeTitle": "Active order",
+    "historyTitle": "History",
+    "allStatuses": "All",
     "emptyTitle": "No orders yet",
-    "emptyBody": "When you reserve a bottle, it will appear here with its pickup deadline.",
-    "findDepot": "Find a store"
+    "emptyBody": "When you reserve a bottle, it will appear here with its pickup code and countdown.",
+    "loginRequiredTitle": "Sign in to track your orders",
+    "loginRequiredBody": "View your active reservation, pickup deadline and order history here.",
+    "loginAction": "Sign in",
+    "managerNoticeTitle": "Customer orders section",
+    "managerNoticeBody": "To process orders received by your store, open your Store Portal.",
+    "goPortalOrders": "Open store orders",
+    "findDepot": "Find a store",
+    "referenceLabel": "Pickup code",
+    "status": {
+      "PENDING": "Waiting for store",
+      "CONFIRMED": "Confirmed · ready for pickup",
+      "PICKED_UP": "Picked up",
+      "REFUSED": "Refused",
+      "EXPIRED": "Expired",
+      "CANCELLED": "Cancelled"
+    },
+    "paymentStatus": {
+      "PENDING": "Pay at store",
+      "PAID": "Paid at store"
+    },
+    "paymentMethod": {
+      "CASH": "Cash",
+      "MOBILE_MONEY": "Mobile Money"
+    },
+    "countdown": {
+      "pendingLabel": "Store reply before {{time}}",
+      "confirmedLabel": "Pick up before {{time}}",
+      "expiredLabel": "Deadline passed",
+      "timeLeft": "Time left"
+    },
+    "bringEmptySameBrand": "Bring to counter: {{count}} empty {{brand}} bottle(s) ({{capacity}}).",
+    "bringEmptyExchange": "Bring to counter: {{count}} empty {{brand}} bottle(s) ({{capacity}}).",
+    "viewDepot": "Store page",
+    "cancelAction": "Cancel order",
+    "cancelSheetTitle": "Cancel this order",
+    "cancelSheetHint": "Your reserved stock will be released immediately. Cancelling does not count as a missed pickup.",
+    "cancelReasonLabel": "Reason (optional)",
+    "cancelReasonPlaceholder": "e.g. I can no longer make it today",
+    "confirmCancel": "Confirm cancellation",
+    "cancelledNotice": "Order cancelled. Stock has been released.",
+    "paymentReceipt": "Payment: {{method}} · {{amount}}",
+    "paymentRef": "Ref. {{ref}}",
+    "noShowTag": "Missed pickup",
+    "reasonPrefix": "Reason: {{reason}}"
   },
   "errors": {
     "networkTitle": "No connection",
@@ -334,9 +389,39 @@
       }
     },
     "orders": {
-      "title": "Order queue",
-      "body": "Receiving and confirming customer reservations (in-store pickup, empty bottle return and payment) will arrive in Milestone 3.",
-      "goStocks": "Manage my stock"
+      "title": "Store orders",
+      "tabPending": "Pending",
+      "tabConfirmed": "Confirmed",
+      "tabAll": "All",
+      "emptyPendingTitle": "No pending orders",
+      "emptyPendingBody": "New customer requests appear here automatically. You have 15 minutes to reply.",
+      "emptyConfirmedTitle": "No pickups waiting",
+      "emptyConfirmedBody": "Once you accept an order, it appears here until the customer arrives.",
+      "emptyAllTitle": "No orders yet",
+      "emptyAllBody": "As soon as a customer reserves a bottle at your store, you can process it here.",
+      "acceptAction": "Accept",
+      "refuseAction": "Refuse",
+      "pickupAction": "Complete pickup",
+      "nonConformityAction": "Empty bottle mismatch",
+      "refuseTitle": "Refuse order",
+      "refuseReasonLabel": "Refusal reason (required)",
+      "refuseReasonPlaceholder": "e.g. Actual stock unavailable or early closing",
+      "nonConformityTitle": "Cancel for empty bottle mismatch",
+      "nonConformityHint": "Reserved stock is released immediately and this does not count as a missed pickup.",
+      "nonConformityReasonLabel": "Mismatch reason (required)",
+      "nonConformityReasonPlaceholder": "e.g. Wrong brand or damaged cylinder",
+      "pickupTitle": "Record pickup and payment",
+      "pickupEmptyReminder": "Verify receipt of {{count}} empty {{brand}} bottle(s) ({{capacity}}) before confirming.",
+      "paymentMethodLabel": "Payment method received",
+      "expectedAmountLabel": "Full amount to collect",
+      "externalRefLabel": "Mobile Money reference (optional)",
+      "externalRefPlaceholder": "e.g. MP260304.1422.A01234",
+      "notesLabel": "Internal note (optional)",
+      "confirmPickup": "Confirm pickup",
+      "acceptedNotice": "Order confirmed. The customer has been given the pickup deadline.",
+      "refusedNotice": "Order refused and stock released.",
+      "pickedUpNotice": "Pickup recorded, payment saved and stock updated.",
+      "nonConformityNotice": "Order cancelled for mismatch and stock released."
     }
   }
 }

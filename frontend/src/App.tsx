@@ -10,7 +10,7 @@ import { DepotsPage } from "./features/depots/DepotsPage";
 import { OrdersPage } from "./features/orders/OrdersPage";
 import { PortalDepotInfoPage } from "./features/portal/PortalDepotInfoPage";
 import { PortalOffersPage } from "./features/portal/PortalOffersPage";
-import { PortalOrdersPlaceholderPage } from "./features/portal/PortalOrdersPlaceholderPage";
+import { PortalOrdersPage } from "./features/portal/PortalOrdersPage";
 import { PortalShell } from "./features/portal/PortalShell";
 import { PortalStocksPage } from "./features/portal/PortalStocksPage";
 import { Layout } from "./shared/Layout";
@@ -39,7 +39,7 @@ export function App() {
                   <Route path="stocks" element={<PortalStocksPage />} />
                   <Route path="offers" element={<PortalOffersPage />} />
                   <Route path="info" element={<PortalDepotInfoPage />} />
-                  <Route path="orders" element={<PortalOrdersPlaceholderPage />} />
+                  <Route path="orders" element={<PortalOrdersPage />} />
                 </Route>
               </Route>
             </Route>

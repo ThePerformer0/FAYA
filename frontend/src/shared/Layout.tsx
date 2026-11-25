@@ -16,6 +16,7 @@ import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { FayaWordmark } from "../design/FayaLogo";
 import { OfflineBanner } from "../design/ui";
 import { useAuth } from "../features/auth/AuthContext";
+import { isActiveOrderStatus, useCustomerOrders, useDepotOrders } from "../features/orders/useOrders";
 import { getActiveLanguage, setAppLanguage } from "../i18n";
 import { useNetworkStatus } from "./NetworkContext";
 
@@ -32,6 +33,21 @@ export function Layout() {
   const { isOnline, justRestored, lastSyncIso } = useNetworkStatus();
   const location = useLocation();
   const activeLang = getActiveLanguage();
+
+  const customerOrdersQuery = useCustomerOrders({ enabled: user?.role === "CUSTOMER" });
+  const depotPendingOrdersQuery = useDepotOrders({
+    status: "PENDING",
+    enabled: user?.role === "DEPOT_MANAGER",
+  });
+
+  const bellCount =
+    user?.role === "DEPOT_MANAGER"
+      ? (depotPendingOrdersQuery.data?.count ?? 0)
+      : user?.role === "CUSTOMER"
+        ? (customerOrdersQuery.data?.results ?? []).filter((o) => isActiveOrderStatus(o.status))
+            .length
+        : 0;
+  const bellTarget = user?.role === "DEPOT_MANAGER" ? "/depot/orders" : "/orders";
 
   const navItems: NavEntry[] = [
     {
@@ -137,12 +153,16 @@ export function Layout() {
 
             {user && (
               <Link
-                to="/orders"
-                aria-label={`${t("nav.orders")} (0)`}
-                className="touch-target inline-flex h-10 items-center gap-1 rounded-sm bg-header-surface px-2.5 text-text-inverse hover:bg-ink-700"
+                to={bellTarget}
+                aria-label={`${t("nav.orders")} (${bellCount})`}
+                className={`touch-target inline-flex h-10 items-center gap-1 rounded-sm px-2.5 text-text-inverse transition-colors duration-150 ${
+                  bellCount > 0
+                    ? "bg-action text-on-action hover:bg-action-pressed"
+                    : "bg-header-surface hover:bg-ink-700"
+                }`}
               >
                 <IconBell size={20} stroke={1.75} aria-hidden="true" />
-                <span className="font-mono text-xs font-medium tabular">0</span>
+                <span className="font-mono text-xs font-medium tabular">{bellCount}</span>
               </Link>
             )}
           </div>
