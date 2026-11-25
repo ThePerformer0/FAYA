@@ -2578,6 +2578,7 @@ components:
           readOnly: true
         exchange_brand_name:
           type: string
+          nullable: true
           readOnly: true
         quantity:
           type: integer

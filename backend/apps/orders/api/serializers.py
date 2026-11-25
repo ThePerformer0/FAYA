@@ -83,9 +83,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         decimal_places=2,
         read_only=True,
     )
-    exchange_brand_name = serializers.CharField(
-        source="exchange_brand_name_snapshot", read_only=True
-    )
+    exchange_brand_name = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderItem
@@ -105,6 +103,10 @@ class OrderItemSerializer(serializers.ModelSerializer):
             "line_total_amount",
         )
         read_only_fields = fields
+
+    @extend_schema_field(serializers.CharField(allow_null=True))
+    def get_exchange_brand_name(self, obj: OrderItem) -> str | None:
+        return obj.exchange_brand_name_snapshot or None
 
 
 class OrderStatusHistorySerializer(serializers.ModelSerializer):

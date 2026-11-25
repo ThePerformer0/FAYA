@@ -298,6 +298,7 @@ class OrderStatusHistory(models.Model):
         related_name="order_status_changes",
     )
     reason = models.TextField(blank=True, default="")
+    sequence = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     objects = ImmutableOrderStatusHistoryQuerySet.as_manager()
@@ -305,9 +306,9 @@ class OrderStatusHistory(models.Model):
     class Meta:
         verbose_name = "Historique de statut commande"
         verbose_name_plural = "Historiques de statut commande"
-        ordering = ["created_at", "id"]
+        ordering = ["sequence", "created_at", "id"]
         indexes = [
-            models.Index(fields=["order", "created_at"]),
+            models.Index(fields=["order", "sequence", "created_at"]),
         ]
 
     def __str__(self) -> str:
@@ -319,6 +320,14 @@ class OrderStatusHistory(models.Model):
             raise PermissionError(
                 "L'historique des statuts de commande est immuable : modification interdite."
             )
+        if not self.sequence and self.order_id:
+            last_seq = (
+                OrderStatusHistory.objects.filter(order_id=self.order_id)
+                .order_by("-sequence")
+                .values_list("sequence", flat=True)
+                .first()
+            )
+            self.sequence = (last_seq or 0) + 1
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):

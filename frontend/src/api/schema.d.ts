@@ -908,7 +908,7 @@ export interface components {
             /** Format: decimal */
             readonly capacity_kg: string;
             readonly operation_type: components["schemas"]["OperationTypeEnum"];
-            readonly exchange_brand_name: string;
+            readonly exchange_brand_name: string | null;
             readonly quantity: number;
             readonly unit_gas_price: number;
             readonly unit_bottle_price: number;

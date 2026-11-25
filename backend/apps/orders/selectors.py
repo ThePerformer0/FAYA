@@ -16,7 +16,9 @@ def _hydrated_orders_qs() -> QuerySet[Order]:
         "product__brand",
         "exchange_brand",
     ).order_by("created_at", "id")
-    history_qs = OrderStatusHistory.objects.select_related("actor").order_by("created_at", "id")
+    history_qs = OrderStatusHistory.objects.select_related("actor").order_by(
+        "sequence", "created_at", "id"
+    )
     return Order.objects.select_related(
         "customer",
         "depot",
