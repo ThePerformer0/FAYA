@@ -1,5 +1,7 @@
 """Endpoint de santé vérifiant la disponibilité de l'API et de PostgreSQL."""
 
+from datetime import UTC
+
 from django.db import connection
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
@@ -57,7 +59,7 @@ class PublicPlatformSettingsView(APIView):
             "no_show_threshold": cfg.no_show_threshold,
             "no_show_window_days": cfg.no_show_window_days,
             "suspension_duration_days": cfg.suspension_duration_days,
-            "server_now": timezone.now(),
+            "server_now": timezone.now().astimezone(UTC),
         }
         serializer = PublicPlatformSettingSerializer(data)
         return Response(serializer.data, status=status.HTTP_200_OK)

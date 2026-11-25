@@ -1,5 +1,6 @@
 """Helpers pour les tests d'API d'authentification (cookie refresh, JWT forgés)."""
 import base64
+from http.cookies import CookieError
 import json
 
 import jwt
@@ -29,7 +30,14 @@ def cookie_value(response):
 
 
 def set_cookie(client, value):
-    client.cookies[cookie_name()] = value
+    try:
+        client.cookies[cookie_name()] = value
+        client.defaults.pop("HTTP_COOKIE", None)
+    except CookieError:
+        # Python 3.12.16+ refuse les caractères de contrôle (ex. \x00) dans SimpleCookie :
+        # on envoie l'en-tête HTTP brut pour simuler un client hostile.
+        client.cookies.pop(cookie_name(), None)
+        client.defaults["HTTP_COOKIE"] = f"{cookie_name()}={value}"
 
 
 def decode_unverified(token):

@@ -1,3 +1,5 @@
+from datetime import UTC
+
 from rest_framework import serializers
 
 
@@ -23,4 +25,4 @@ class PublicPlatformSettingSerializer(serializers.Serializer):
     no_show_threshold = serializers.IntegerField()
     no_show_window_days = serializers.IntegerField()
     suspension_duration_days = serializers.IntegerField()
-    server_now = serializers.DateTimeField()
+    server_now = serializers.DateTimeField(default_timezone=UTC)
